@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState } from "react"
+import { useLocation, useNavigate, Link } from "react-router-dom"
 
 function ResetPassword() {
-  const [token, setToken] = useState("")
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [token, setToken] = useState(location.state?.token || "")
   const [newPassword, setNewPassword] = useState("")
   const [message, setMessage] = useState("")
 
@@ -17,20 +20,35 @@ function ResetPassword() {
     const data = await response.json()
 
     if (response.ok) {
-      setMessage("Password reset successful!")
+      navigate("/login")
     } else {
       setMessage(data.detail)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2 max-w-xs mb-8">
-      <h2 className="font-bold">Reset Password</h2>
-      <input placeholder="Reset token" value={token} onChange={(e) => setToken(e.target.value)} className="border border-gray-400 rounded px-2 py-1" />
-      <input placeholder="New password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="border border-gray-400 rounded px-2 py-1" />
-      <button type="submit" className="bg-blue-600 text-white rounded px-3 py-1">Reset Password</button>
-      <p>{message}</p>
-    </form>
+    <div>
+      <h2 className="text-2xl font-bold mb-1">Reset password</h2>
+      <p className="text-gray-500 mb-6">Enter your reset token and a new password.</p>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Reset token</label>
+          <input value={token} onChange={(e) => setToken(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">New password</label>
+          <input placeholder="At least 8 characters" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
+        </div>
+
+        <button type="submit" className="bg-blue-950 text-white rounded px-3 py-2">Reset password</button>
+
+        {message && <p className="text-red-600 text-sm">{message}</p>}
+      </form>
+
+      <Link to="/login" className="text-sm text-blue-900 mt-4 inline-block">← Back to log in</Link>
+    </div>
   )
 }
 

@@ -10,6 +10,19 @@ from app.dependencies import get_current_admin
 router = APIRouter()
 
 
+@router.get("/stats")
+async def get_stats(admin: UserOut = Depends(get_current_admin)):
+    total_users = await db["users"].count_documents({})
+    total_posts = await db["posts"].count_documents({})
+    restricted = await db["users"].count_documents({"status": "restricted"})
+
+    return {
+        "total_users": total_users,
+        "total_posts": total_posts,
+        "restricted": restricted,
+    }
+
+
 @router.get("/users", response_model=list[UserOut])
 async def list_users(admin: UserOut = Depends(get_current_admin)):
     cursor = db["users"].find()

@@ -5,6 +5,7 @@ from bson.errors import InvalidId
 
 from app.database.connection import db
 from app.schemas.friend import FriendRequestOut, FriendOut
+from app.schemas.user import UserOut
 
 
 def _to_request_out(req: dict) -> FriendRequestOut:
@@ -118,3 +119,32 @@ async def list_pending_requests(current_user_id: str) -> list[FriendRequestOut]:
         requests.append(_to_request_out(req))
 
     return requests
+
+
+async def discover_users(current_user_id: str) -> list[UserOut]:
+    cursor = db["friend_requests"].find({
+        "$or": [{"from_user_id": current_user_id}, {"to_user_id": current_user_id}],
+    })
+
+    excluded_ids = {current_user_id}
+    async for req in cursor:
+        excluded_ids.add(req["from_user_id"])
+        excluded_ids.add(req["to_user_id"])
+
+    excluded_object_ids = [ObjectId(uid) for uid in excluded_ids]
+
+    cursor = db["users"].find({"_id": {"$nin": excluded_object_ids}})
+
+    users = []
+    async for user in cursor:
+        users.append(UserOut(
+            id=str(user["_id"]),
+            name=user["name"],
+            email=user["email"],
+            bio=user.get("bio"),
+            phone=user.get("phone"),
+            role=user.get("role", "user"),
+            status=user.get("status", "active"),
+        ))
+
+    return users

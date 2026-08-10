@@ -46,3 +46,8 @@ async def delete_request(request_id: str, current_user: UserOut = Depends(get_cu
 @router.get("", response_model=list[FriendOut])
 async def get_friends(current_user: UserOut = Depends(get_current_user)):
     return await friend_service.list_friends(current_user.id)
+
+
+@router.get("/discover", response_model=list[UserOut])
+async def discover(current_user: UserOut = Depends(get_current_user)):
+    return await friend_service.discover_users(current_user.id)
