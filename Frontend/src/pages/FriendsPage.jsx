@@ -109,12 +109,14 @@ function FriendsPage() {
         <div className="flex flex-col gap-3">
           {friends.length === 0 && <p className="text-gray-500">No friends yet — check Discover.</p>}
           {friends.map((friend) => (
-            <div key={friend.request_id} className="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+            <div key={friend.request_id} className={`border rounded-lg p-4 flex items-center justify-between ${friend.deleted ? "border-gray-200 bg-gray-50" : "border-gray-200"}`}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm">
-                  {initials(friend.name)}
+                <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center font-bold text-sm ${friend.deleted ? "bg-gray-400" : "bg-blue-900"}`}>
+                  {friend.deleted ? "?" : initials(friend.name)}
                 </div>
-                <p className="font-semibold">{friend.name}</p>
+                <p className={friend.deleted ? "text-gray-400 italic" : "font-semibold"}>
+                  {friend.deleted ? "Deleted Account" : friend.name}
+                </p>
               </div>
               <button onClick={() => handleDecline(friend.request_id)} className="border border-gray-300 text-gray-600 rounded px-3 py-1 text-sm">Remove</button>
             </div>

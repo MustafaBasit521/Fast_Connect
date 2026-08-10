@@ -27,5 +27,9 @@ async def update_my_profile(data: ProfileUpdate, current_user: UserOut = Depends
 
 @router.delete("/me")
 async def delete_my_profile(current_user: UserOut = Depends(get_current_user)):
-    await profile_service.delete_profile(current_user.email)
+    try:
+        await profile_service.delete_profile(current_user.email)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
     return {"message": "Account deleted successfully"}

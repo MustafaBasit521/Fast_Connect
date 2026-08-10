@@ -64,10 +64,10 @@ function MessagesPage() {
             onClick={() => setSelected(friend)}
             className={`w-full text-left px-4 py-3 flex items-center gap-3 ${selected?.id === friend.id ? "bg-blue-50" : ""}`}
           >
-            <div className="w-9 h-9 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm">
-              {initials(friend.name)}
+            <div className={`w-9 h-9 rounded-full text-white flex items-center justify-center font-bold text-sm ${friend.deleted ? "bg-gray-400" : "bg-blue-900"}`}>
+              {friend.deleted ? "?" : initials(friend.name)}
             </div>
-            <p className="font-medium text-sm">{friend.name}</p>
+            <p className={friend.deleted ? "text-sm text-gray-400 italic" : "font-medium text-sm"}>{friend.name}</p>
           </button>
         ))}
       </div>
@@ -92,15 +92,21 @@ function MessagesPage() {
               ))}
             </div>
 
-            <form onSubmit={handleSend} className="p-4 border-t border-gray-200 flex gap-2">
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Write a message..."
-                className="flex-1 border border-gray-300 rounded px-3 py-2"
-              />
-              <button type="submit" className="bg-blue-950 text-white rounded px-4 py-2">Send</button>
-            </form>
+            {selected.deleted ? (
+              <p className="p-4 border-t border-gray-200 text-sm text-gray-400 italic">
+                This user's account has been deleted — you can't send new messages.
+              </p>
+            ) : (
+              <form onSubmit={handleSend} className="p-4 border-t border-gray-200 flex gap-2">
+                <input
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Write a message..."
+                  className="flex-1 border border-gray-300 rounded px-3 py-2"
+                />
+                <button type="submit" className="bg-blue-950 text-white rounded px-4 py-2">Send</button>
+              </form>
+            )}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-400">Select a conversation</div>

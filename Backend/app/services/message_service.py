@@ -1,7 +1,12 @@
+import asyncio
 from datetime import datetime, timezone
+
+from bson import ObjectId
+from bson.errors import InvalidId
 
 from app.database.connection import db
 from app.schemas.message import MessageCreate, MessageOut
+from app.services.email import send_new_message_email
 
 
 def _to_message_out(msg: dict) -> MessageOut:
@@ -25,12 +30,20 @@ async def _are_friends(user_a: str, user_b: str) -> bool:
     return existing is not None
 
 
-async def send_message(from_id: str, to_id: str, data: MessageCreate) -> MessageOut:
+async def send_message(from_id: str, from_name: str, to_id: str, data: MessageCreate) -> MessageOut:
     if from_id == to_id:
         raise ValueError("You cannot message yourself")
 
     if not await _are_friends(from_id, to_id):
         raise PermissionError("You can only message your friends")
+
+    try:
+        to_user = await db["users"].find_one({"_id": ObjectId(to_id)})
+    except InvalidId:
+        to_user = None
+
+    if to_user is None:
+        raise ValueError("This user's account has been deleted")
 
     message_data = {
         "from_user_id": from_id,
@@ -41,6 +54,8 @@ async def send_message(from_id: str, to_id: str, data: MessageCreate) -> Message
 
     result = await db["messages"].insert_one(message_data)
     message_data["_id"] = result.inserted_id
+
+    asyncio.create_task(asyncio.to_thread(send_new_message_email, to_user["email"], to_user["name"], from_name))
 
     return _to_message_out(message_data)
 

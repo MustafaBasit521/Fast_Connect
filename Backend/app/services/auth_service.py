@@ -1,4 +1,5 @@
 import os
+import asyncio
 import bcrypt
 import jwt
 from datetime import datetime, timedelta, timezone
@@ -6,6 +7,7 @@ from dotenv import load_dotenv
 
 from app.database.connection import db
 from app.schemas.user import UserSignUp, UserLogin, UserOut,ChangePassword
+from app.services.email import send_welcome_email, send_password_reset_email
 
 load_dotenv()
 
@@ -26,6 +28,8 @@ async def create_user(user: UserSignUp):
     user_data["status"] = "active"
 
     result = await db["users"].insert_one(user_data)
+
+    asyncio.create_task(asyncio.to_thread(send_welcome_email, user.name, user.email))
 
     return UserOut(
         id=str(result.inserted_id),
@@ -96,13 +100,17 @@ def create_reset_token(email: str) -> str:
     return jwt.encode(payload, SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
-async def forgot_password(email:str):
-    existing=await db["users"].find_one({"email":email})
+async def forgot_password(email: str):
+    existing = await db["users"].find_one({"email": email})
 
     if not existing:
         raise ValueError("User Not Found!")
 
-    return create_reset_token(email)
+    token = create_reset_token(email)
+
+    asyncio.create_task(asyncio.to_thread(send_password_reset_email, email, existing["name"], token))
+
+    return token
 
 async def reset_password(token: str, new_password: str):
     try:

@@ -1,102 +1,81 @@
-# import nodemailer from 'nodemailer';
-# import { env } from '../config/env.js';
+import os
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
-# const isSmtpConfigured = Boolean(env.smtpHost && env.smtpUser && env.smtpPass);
+from dotenv import load_dotenv
 
-# // getTransporter: builds the SMTP transporter when email credentials are configured.
-# const getTransporter = () => {
-#   if (!isSmtpConfigured) return null;
+load_dotenv()
 
-#   return nodemailer.createTransport({
-#     host: env.smtpHost,
-#     port: env.smtpPort,
-#     secure: env.smtpSecure,
-#     auth: {
-#       user: env.smtpUser,
-#       pass: env.smtpPass
-#     }
-#   });
-# };
+SMTP_HOST = os.getenv("SMTP_HOST")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASS = os.getenv("SMTP_PASS")
+MAIL_FROM = os.getenv("MAIL_FROM", SMTP_USER)
+MAIL_ENABLED = os.getenv("MAIL_ENABLED", "false").lower() == "true"
 
-# const transporter = getTransporter();
+IS_SMTP_CONFIGURED = bool(SMTP_HOST and SMTP_USER and SMTP_PASS)
 
-# // sendEmail: sends an email or logs a preview when SMTP is not configured.
-# export const sendEmail = async ({ to, subject, text, html }) => {
-#   if (!env.mailEnabled || !to) return;
 
-#   if (!transporter) {
-#     console.log('[email:preview]', { to, subject, text });
-#     return;
-#   }
+def send_email(to: str, subject: str, text: str, html: str | None = None):
+    if not MAIL_ENABLED or not to:
+        return
 
-#   try {
-#     await transporter.sendMail({
-#       from: env.mailFrom,
-#       to,
-#       subject,
-#       text,
-#       html
-#     });
-#   } catch (error) {
-#     console.error('Email delivery failed:', error.message);
-#   }
-# };
+    if not IS_SMTP_CONFIGURED:
+        print(f"[email:preview] to={to} subject={subject}\n{text}")
+        return
 
-# // money: formats numeric values as currency for email copy.
-# const money = (value) => `$${Number(value || 0).toFixed(2)}`;
-# // orderId: creates a short customer-friendly order reference.
-# const orderId = (order) => order._id.toString().slice(-8).toUpperCase();
+    assert SMTP_HOST and SMTP_USER and SMTP_PASS and MAIL_FROM
 
-# // orderLines: formats order items for plain-text emails.
-# const orderLines = (items = []) =>
-#   items.map((item) => `- ${item.name} x ${item.quantity}: ${money(item.lineTotal)}`).join('\n');
+    message = MIMEMultipart("alternative")
+    message["From"] = MAIL_FROM
+    message["To"] = to
+    message["Subject"] = subject
 
-# // orderHtml: builds a simple HTML email body for order notifications.
-# const orderHtml = (title, intro, order) => `
-#   <div style="font-family:Arial,sans-serif;color:#0b1c3a;line-height:1.5">
-#     <h2>${title}</h2>
-#     <p>${intro}</p>
-#     <p><strong>Order:</strong> #${orderId(order)}</p>
-#     <p><strong>Total:</strong> ${money(order.totalAmount)}</p>
-#     <ul>
-#       ${(order.items || []).map((item) => `<li>${item.name} x ${item.quantity}: <strong>${money(item.lineTotal)}</strong></li>`).join('')}
-#     </ul>
-#     <p style="color:#5c7093">BazaarX</p>
-#   </div>
-# `;
+    message.attach(MIMEText(text, "plain"))
+    if html:
+        message.attach(MIMEText(html, "html"))
 
-# // sendWelcomeEmail: emails users after account creation.
-# export const sendWelcomeEmail = (user) =>
-#   sendEmail({
-#     to: user.email,
-#     subject: 'Welcome to BazaarX',
-#     text: `Hi ${user.name}, your BazaarX ${user.role} account has been created successfully.`,
-#     html: `<p>Hi <strong>${user.name}</strong>, your BazaarX ${user.role} account has been created successfully.</p>`
-#   });
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.sendmail(MAIL_FROM, to, message.as_string())
+    except Exception as e:
+        print(f"Email delivery failed: {e}")
 
-# // sendCustomerOrderPlacedEmail: tells customers their order was placed and awaits confirmation.
-# export const sendCustomerOrderPlacedEmail = (customer, order) =>
-#   sendEmail({
-#     to: customer.email,
-#     subject: `BazaarX order #${orderId(order)} placed`,
-#     text: `Hi ${customer.name}, your order #${orderId(order)} has been placed. Please wait for seller confirmation.\n\n${orderLines(order.items)}\n\nTotal: ${money(order.totalAmount)}`,
-#     html: orderHtml('Order placed', `Hi ${customer.name}, your order has been placed. Please wait for seller confirmation.`, order)
-#   });
 
-# // sendSellerOrderReceivedEmail: tells sellers a new order arrived.
-# export const sendSellerOrderReceivedEmail = (seller, order) =>
-#   sendEmail({
-#     to: seller.email,
-#     subject: `New BazaarX order #${orderId(order)}`,
-#     text: `Hi ${seller.name}, you received a new order #${orderId(order)}.\n\n${orderLines(order.items)}\n\nTotal: ${money(order.totalAmount)}`,
-#     html: orderHtml('New order received', `Hi ${seller.name}, you received a new order.`, order)
-#   });
+def send_welcome_email(user_name: str, user_email: str):
+    send_email(
+        to=user_email,
+        subject="Welcome to FAST Connect",
+        text=f"Hi {user_name}, your FAST Connect account has been created successfully.",
+        html=f"<p>Hi <strong>{user_name}</strong>, your FAST Connect account has been created successfully.</p>",
+    )
 
-# // sendCustomerOrderConfirmedEmail: tells customers the seller confirmed their order.
-# export const sendCustomerOrderConfirmedEmail = (customer, order) =>
-#   sendEmail({
-#     to: customer.email,
-#     subject: `BazaarX order #${orderId(order)} confirmed`,
-#     text: `Hi ${customer.name}, your order #${orderId(order)} has been confirmed by the seller.`,
-#     html: orderHtml('Order confirmed', `Hi ${customer.name}, your order has been confirmed by the seller.`, order)
-#   });
+
+def send_friend_request_email(to_email: str, to_name: str, from_name: str):
+    send_email(
+        to=to_email,
+        subject=f"{from_name} sent you a friend request",
+        text=f"Hi {to_name}, {from_name} sent you a friend request on FAST Connect.",
+        html=f"<p>Hi <strong>{to_name}</strong>, <strong>{from_name}</strong> sent you a friend request on FAST Connect.</p>",
+    )
+
+
+def send_new_message_email(to_email: str, to_name: str, from_name: str):
+    send_email(
+        to=to_email,
+        subject=f"New message from {from_name}",
+        text=f"Hi {to_name}, you have a new message from {from_name} on FAST Connect.",
+        html=f"<p>Hi <strong>{to_name}</strong>, you have a new message from <strong>{from_name}</strong> on FAST Connect.</p>",
+    )
+
+
+def send_password_reset_email(to_email: str, to_name: str, reset_token: str):
+    send_email(
+        to=to_email,
+        subject="Reset your FAST Connect password",
+        text=f"Hi {to_name}, use this token to reset your password: {reset_token}",
+        html=f"<p>Hi <strong>{to_name}</strong>, use this token to reset your password: <strong>{reset_token}</strong></p>",
+    )

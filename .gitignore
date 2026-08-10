@@ -3,3 +3,4 @@ venv/
 __pycache__/
 *.pyc
 LEARNING_NOTES.md
+Backend/uploads/

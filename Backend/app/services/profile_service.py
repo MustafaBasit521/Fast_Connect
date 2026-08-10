@@ -43,5 +43,22 @@ async def update_profile(email: str, data: ProfileUpdate) -> UserOut:
     return _to_user_out(user)
 
 
+async def cascade_delete_user_data(user_id: str):
+    await db["posts"].delete_many({"author_id": user_id})
+    await db["comments"].delete_many({"author_id": user_id})
+    await db["posts"].update_many({}, {"$pull": {"likes": user_id}})
+    await db["friend_requests"].delete_many({
+        "status": "pending",
+        "$or": [{"from_user_id": user_id}, {"to_user_id": user_id}],
+    })
+
+
 async def delete_profile(email: str):
-    await db["users"].delete_one({"email": email})
+    user = await db["users"].find_one({"email": email})
+    if user is None:
+        raise ValueError("User not found")
+
+    user_id = str(user["_id"])
+
+    await cascade_delete_user_data(user_id)
+    await db["users"].delete_one({"_id": user["_id"]})

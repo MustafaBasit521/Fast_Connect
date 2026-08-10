@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timezone
 
 from bson import ObjectId
@@ -6,6 +7,7 @@ from bson.errors import InvalidId
 from app.database.connection import db
 from app.schemas.friend import FriendRequestOut, FriendOut
 from app.schemas.user import UserOut
+from app.services.email import send_friend_request_email
 
 
 def _to_request_out(req: dict) -> FriendRequestOut:
@@ -53,6 +55,8 @@ async def send_request(from_id: str, from_name: str, to_id: str) -> FriendReques
 
     result = await db["friend_requests"].insert_one(request_data)
     request_data["_id"] = result.inserted_id
+
+    asyncio.create_task(asyncio.to_thread(send_friend_request_email, to_user["email"], to_user["name"], from_name))
 
     return _to_request_out(request_data)
 
@@ -106,7 +110,19 @@ async def list_friends(current_user_id: str) -> list[FriendOut]:
         is_sender = req["from_user_id"] == current_user_id
         friend_id = req["to_user_id"] if is_sender else req["from_user_id"]
         friend_name = req["to_user_name"] if is_sender else req["from_user_name"]
-        friends.append(FriendOut(request_id=str(req["_id"]), id=friend_id, name=friend_name))
+
+        try:
+            friend_user = await db["users"].find_one({"_id": ObjectId(friend_id)})
+        except InvalidId:
+            friend_user = None
+
+        if friend_user is None:
+            friend_name = "Deleted Account"
+            is_deleted = True
+        else:
+            is_deleted = False
+
+        friends.append(FriendOut(request_id=str(req["_id"]), id=friend_id, name=friend_name, deleted=is_deleted))
 
     return friends
 

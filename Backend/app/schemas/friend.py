@@ -16,3 +16,4 @@ class FriendOut(BaseModel):
     request_id: str
     id: str
     name: str
+    deleted: bool = False

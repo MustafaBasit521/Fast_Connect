@@ -63,9 +63,20 @@ function Feed() {
   const { user } = useAuth()
   const [posts, setPosts] = useState([])
   const [content, setContent] = useState("")
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+  const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState("")
   const [editingId, setEditingId] = useState(null)
   const [editContent, setEditContent] = useState("")
+
+  function handleImageSelect(e) {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+  }
 
   async function loadFeed() {
     const response = await fetch("http://127.0.0.1:8000/posts", {
@@ -88,15 +99,42 @@ function Feed() {
     e.preventDefault()
     if (!content.trim()) return
 
+    let imageUrl = null
+
+    if (imageFile) {
+      setUploading(true)
+
+      const formData = new FormData()
+      formData.append("file", imageFile)
+
+      const uploadResponse = await fetch("http://127.0.0.1:8000/uploads/image", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
+        body: formData,
+      })
+      const uploadData = await uploadResponse.json()
+
+      setUploading(false)
+
+      if (!uploadResponse.ok) {
+        setMessage(getErrorMessage(uploadData))
+        return
+      }
+
+      imageUrl = uploadData.url
+    }
+
     const response = await fetch("http://127.0.0.1:8000/posts", {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, image_url: imageUrl }),
     })
     const data = await response.json()
 
     if (response.ok) {
       setContent("")
+      setImageFile(null)
+      setImagePreview(null)
       loadFeed()
     } else {
       setMessage(getErrorMessage(data))
@@ -147,14 +185,28 @@ function Feed() {
         <div className="w-9 h-9 rounded-full bg-blue-950 text-white flex items-center justify-center font-bold text-sm shrink-0">
           {initials(user.name)}
         </div>
-        <form onSubmit={handleCreate} className="flex-1 flex gap-2">
+        <form onSubmit={handleCreate} className="flex-1 flex flex-col gap-2">
           <input
             placeholder="Share something with your campus..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="flex-1 border border-gray-300 rounded px-3 py-2"
+            className="w-full border border-gray-300 rounded px-3 py-2"
           />
-          <button type="submit" className="bg-blue-950 text-white rounded px-4 py-2 shrink-0">Post</button>
+
+          {imagePreview && (
+            <img src={imagePreview} alt="Selected" className="w-full h-auto max-h-80 object-cover rounded-lg" />
+          )}
+
+          <div className="flex items-center justify-between">
+            <label className="text-sm text-blue-900 cursor-pointer">
+              📷 Add photo
+              <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+            </label>
+
+            <button type="submit" disabled={uploading} className="bg-blue-950 text-white rounded px-4 py-2 disabled:opacity-50">
+              {uploading ? "Uploading..." : "Post"}
+            </button>
+          </div>
         </form>
       </div>
 
@@ -181,7 +233,16 @@ function Feed() {
                 </div>
               </div>
             ) : (
-              <p>{post.content}</p>
+              <>
+                <p>{post.content}</p>
+                {post.image_url && (
+                  <img
+                    src={`http://127.0.0.1:8000${post.image_url}`}
+                    alt="Post attachment"
+                    className="w-full h-auto rounded-lg mt-2"
+                  />
+                )}
+              </>
             )}
 
             <div className="flex gap-4 items-center mt-3 text-sm text-gray-500">

@@ -17,6 +17,9 @@ function MyProfile() {
   const [newPassword, setNewPassword] = useState("")
   const [passwordMessage, setPasswordMessage] = useState("")
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState("")
+
   useEffect(() => {
     if (user) {
       setName(user.name)
@@ -149,8 +152,45 @@ function MyProfile() {
 
       <div className="border border-red-200 bg-red-50 rounded-lg p-6">
         <h2 className="font-semibold text-red-700 mb-1">Danger Zone</h2>
-        <p className="text-sm text-red-600 mb-4">Deleting your account removes your profile, posts and messages.</p>
-        <button onClick={handleDelete} className="bg-red-600 text-white rounded px-4 py-2">Delete Account</button>
+        <p className="text-sm text-red-600 mb-4">
+          Deleting your account removes your posts, comments, and likes. Friends will keep your past
+          messages, but your account will show as deleted.
+        </p>
+
+        {!showDeleteConfirm ? (
+          <button onClick={() => setShowDeleteConfirm(true)} className="bg-red-600 text-white rounded px-4 py-2">
+            Delete Account
+          </button>
+        ) : (
+          <div className="flex flex-col gap-2 max-w-xs">
+            <label className="text-sm text-red-700">
+              Type <strong>delete</strong> to confirm:
+            </label>
+            <input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              className="border border-red-300 rounded px-3 py-2"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleDelete}
+                disabled={deleteConfirmText.toLowerCase() !== "delete"}
+                className="bg-red-600 text-white rounded px-4 py-2 disabled:opacity-40"
+              >
+                Confirm Delete
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false)
+                  setDeleteConfirmText("")
+                }}
+                className="text-gray-600 px-4 py-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

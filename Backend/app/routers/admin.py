@@ -4,7 +4,7 @@ from bson.errors import InvalidId
 
 from app.schemas.user import UserOut
 from app.database.connection import db
-from app.services import post_service, comment_service, blog_service
+from app.services import post_service, comment_service, blog_service, profile_service
 from app.dependencies import get_current_admin
 
 router = APIRouter()
@@ -62,6 +62,8 @@ async def delete_user(user_id: str, admin: UserOut = Depends(get_current_admin))
         object_id = ObjectId(user_id)
     except InvalidId:
         raise HTTPException(status_code=404, detail="User not found")
+
+    await profile_service.cascade_delete_user_data(user_id)
 
     result = await db["users"].delete_one({"_id": object_id})
     if result.deleted_count == 0:
