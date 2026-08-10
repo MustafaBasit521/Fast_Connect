@@ -8,6 +8,8 @@ class UserOut(BaseModel):
     id: str
     name: str
     email: EmailStr
+    bio: Optional[str] = None
+    phone: Optional[str] = None
 
 class UserSignUp(BaseModel):
     name:str=Field(...,min_length=3,description='Enter your name')
@@ -37,6 +39,11 @@ class ForgotPassword(BaseModel):
 class ResetPassword(BaseModel):
     token:str
     new_password:str=Field(...,min_length=8)
+
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=3)
+    bio: Optional[str] = None
+    phone: Optional[str] = None
 
 
 

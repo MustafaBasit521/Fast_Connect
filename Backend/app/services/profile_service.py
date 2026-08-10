@@ -1,0 +1,42 @@
+from bson import ObjectId
+from bson.errors import InvalidId
+
+from app.database.connection import db
+from app.schemas.user import UserOut, ProfileUpdate
+
+
+def _to_user_out(user: dict) -> UserOut:
+    return UserOut(
+        id=str(user["_id"]),
+        name=user["name"],
+        email=user["email"],
+        bio=user.get("bio"),
+        phone=user.get("phone"),
+    )
+
+
+async def get_profile(user_id: str) -> UserOut | None:
+    try:
+        object_id = ObjectId(user_id)
+    except InvalidId:
+        return None
+
+    user = await db["users"].find_one({"_id": object_id})
+    if user is None:
+        return None
+
+    return _to_user_out(user)
+
+
+async def update_profile(email: str, data: ProfileUpdate) -> UserOut:
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+
+    if update_data:
+        await db["users"].update_one({"email": email}, {"$set": update_data})
+
+    user = await db["users"].find_one({"email": email})
+    return _to_user_out(user)
+
+
+async def delete_profile(email: str):
+    await db["users"].delete_one({"email": email})

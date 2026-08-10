@@ -25,7 +25,7 @@ async def create_user(user: UserSignUp):
 
     result = await db["users"].insert_one(user_data)
 
-    return UserOut(id=str(result.inserted_id), name=user.name, email=user.email)
+    return UserOut(id=str(result.inserted_id), name=user.name, email=user.email, bio=user.bio, phone=user.phone)
 
 
 async def authenticate_user(credentials: UserLogin):
@@ -42,7 +42,13 @@ async def authenticate_user(credentials: UserLogin):
     if not password_matches:
         return None
 
-    return UserOut(id=str(existing["_id"]), name=existing["name"], email=existing["email"])
+    return UserOut(
+        id=str(existing["_id"]),
+        name=existing["name"],
+        email=existing["email"],
+        bio=existing.get("bio"),
+        phone=existing.get("phone"),
+    )
 
 def create_access_token(data: dict) -> str:
     payload = data.copy()
@@ -69,10 +75,10 @@ async def change_password(email: str, data: ChangePassword):
     )
 
 
-def create_reset_token(email:str):
-    payLoad={"sub":email,"purpose":"password_reset"}
-    payLoad["exp"]=datetime.now(timezone.utc)+timedelta(minutes=15)
-    return jwt.encode(payLoad,SECRET_KEY,algorithm=JWT_ALGORITHM)
+def create_reset_token(email: str) -> str:
+    payload = {"sub": email, "purpose": "password_reset"}
+    payload["exp"] = datetime.now(timezone.utc) + timedelta(minutes=15)
+    return jwt.encode(payload, SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
 async def forgot_password(email:str):

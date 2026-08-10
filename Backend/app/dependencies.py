@@ -25,4 +25,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
 
-    return UserOut(id=str(user["_id"]), name=user["name"], email=user["email"])
+    return UserOut(
+        id=str(user["_id"]),
+        name=user["name"],
+        email=user["email"],
+        bio=user.get("bio"),
+        phone=user.get("phone"),
+    )
