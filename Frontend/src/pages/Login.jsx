@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
+import { getErrorMessage } from "../utils/errors"
 
 function Login() {
   const [email, setEmail] = useState("")
@@ -25,7 +26,7 @@ function Login() {
       await refreshUser()
       navigate("/feed")
     } else {
-      setMessage(data.detail)
+      setMessage(getErrorMessage(data))
     }
   }
 

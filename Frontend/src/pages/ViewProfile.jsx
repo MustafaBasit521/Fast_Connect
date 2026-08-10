@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { getErrorMessage } from "../utils/errors"
 
 function ViewProfile() {
   const [userId, setUserId] = useState("")
@@ -16,7 +17,7 @@ function ViewProfile() {
       setMessage("")
     } else {
       setProfile(null)
-      setMessage(data.detail)
+      setMessage(getErrorMessage(data))
     }
   }
 

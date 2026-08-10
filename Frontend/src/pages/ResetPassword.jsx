@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useLocation, useNavigate, Link } from "react-router-dom"
+import { getErrorMessage } from "../utils/errors"
 
 function ResetPassword() {
   const location = useLocation()
@@ -22,7 +23,7 @@ function ResetPassword() {
     if (response.ok) {
       navigate("/login")
     } else {
-      setMessage(data.detail)
+      setMessage(getErrorMessage(data))
     }
   }
 

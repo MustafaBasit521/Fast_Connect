@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { getErrorMessage } from "../utils/errors"
 
 function SignUp() {
   const [name, setName] = useState("")
@@ -22,7 +23,7 @@ function SignUp() {
     if (response.ok) {
       navigate("/login")
     } else {
-      setMessage(data.detail)
+      setMessage(getErrorMessage(data))
     }
   }
 

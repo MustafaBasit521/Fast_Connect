@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { initials } from "../utils/initials"
+import { getErrorMessage } from "../utils/errors"
 
 function authHeaders() {
   const token = localStorage.getItem("token")
@@ -75,7 +76,7 @@ function Feed() {
     if (response.ok) {
       setPosts(data)
     } else {
-      setMessage(data.detail)
+      setMessage(getErrorMessage(data))
     }
   }
 
@@ -98,7 +99,7 @@ function Feed() {
       setContent("")
       loadFeed()
     } else {
-      setMessage(data.detail)
+      setMessage(getErrorMessage(data))
     }
   }
 

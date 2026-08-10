@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { initials } from "../utils/initials"
+import { getErrorMessage } from "../utils/errors"
 
 function MyProfile() {
   const { user, refreshUser, logout } = useAuth()
@@ -44,7 +45,7 @@ function MyProfile() {
       setProfileMessage("Profile updated!")
       await refreshUser()
     } else {
-      setProfileMessage(data.detail)
+      setProfileMessage(getErrorMessage(data))
     }
   }
 
@@ -69,7 +70,7 @@ function MyProfile() {
       setOldPassword("")
       setNewPassword("")
     } else {
-      setPasswordMessage(data.detail)
+      setPasswordMessage(getErrorMessage(data))
     }
   }
 

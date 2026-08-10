@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { getErrorMessage } from "../utils/errors"
 
 function ForgotPassword() {
   const [email, setEmail] = useState("")
@@ -22,7 +23,7 @@ function ForgotPassword() {
       setResetToken(data.reset_token)
       setMessage("")
     } else {
-      setMessage(data.detail)
+      setMessage(getErrorMessage(data))
     }
   }
 
