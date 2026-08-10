@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { getErrorMessage } from "../utils/errors"
+import MagneticButton from "../components/MagneticButton"
 
 function Login() {
   const [email, setEmail] = useState("")
@@ -52,7 +53,7 @@ function Login() {
           <Link to="/forgot-password" className="text-sm text-blue-900 float-right mt-1">Forgot password?</Link>
         </div>
 
-        <button type="submit" className="bg-blue-950 text-white rounded px-3 py-2 mt-4">Log In</button>
+        <MagneticButton type="submit" className="mt-4">Log In</MagneticButton>
 
         {message && <p className="text-red-600 text-sm">{message}</p>}
       </form>

@@ -94,59 +94,66 @@ function MyProfile() {
   }
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-3xl">
       <h1 className="text-2xl font-bold mb-4">My Profile &amp; Settings</h1>
 
-      <div className="border border-gray-200 rounded-lg p-6 mb-4">
+      <div className="border rounded-lg p-6 mb-4" style={{ borderColor: "var(--color-border)" }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-full bg-blue-950 text-white flex items-center justify-center font-bold">
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center font-bold"
+            style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+          >
             {initials(name || user.name)}
           </div>
           <div>
             <p className="font-semibold">{user.name}</p>
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="text-sm" style={{ color: "var(--color-muted)" }}>{user.email}</p>
           </div>
         </div>
 
         <form onSubmit={handleProfileSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border rounded px-3 py-2" style={{ borderColor: "var(--color-border)" }} />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Bio</label>
-            <input value={bio} onChange={(e) => setBio(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input value={bio} onChange={(e) => setBio(e.target.value)} className="w-full border rounded px-3 py-2" style={{ borderColor: "var(--color-border)" }} />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Phone</label>
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full border rounded px-3 py-2" style={{ borderColor: "var(--color-border)" }} />
           </div>
 
-          <button type="submit" className="bg-blue-950 text-white rounded px-4 py-2 self-start">Save Changes</button>
+          <button type="submit" className="rounded px-4 py-2 self-start" style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}>
+            Save Changes
+          </button>
 
-          {profileMessage && <p className="text-sm text-gray-600">{profileMessage}</p>}
+          {profileMessage && <p className="text-sm" style={{ color: "var(--color-muted)" }}>{profileMessage}</p>}
         </form>
       </div>
 
-      <div className="border border-gray-200 rounded-lg p-6 mb-4">
+      <div className="border rounded-lg p-6 mb-4" style={{ borderColor: "var(--color-border)" }}>
         <h2 className="font-semibold mb-4">Change Password</h2>
 
         <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Current password</label>
-            <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} className="w-full border rounded px-3 py-2" style={{ borderColor: "var(--color-border)" }} />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">New password</label>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border rounded px-3 py-2" style={{ borderColor: "var(--color-border)" }} />
           </div>
 
-          <button type="submit" className="border border-blue-950 text-blue-950 rounded px-4 py-2 self-start">Change Password</button>
+          <button type="submit" className="border rounded px-4 py-2 self-start" style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
+            Change Password
+          </button>
 
-          {passwordMessage && <p className="text-sm text-gray-600">{passwordMessage}</p>}
+          {passwordMessage && <p className="text-sm" style={{ color: "var(--color-muted)" }}>{passwordMessage}</p>}
         </form>
       </div>
 
@@ -184,7 +191,8 @@ function MyProfile() {
                   setShowDeleteConfirm(false)
                   setDeleteConfirmText("")
                 }}
-                className="text-gray-600 px-4 py-2"
+                style={{ color: "var(--color-muted)" }}
+                className="px-4 py-2"
               >
                 Cancel
               </button>

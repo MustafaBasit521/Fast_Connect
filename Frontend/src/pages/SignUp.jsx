@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { getErrorMessage } from "../utils/errors"
+import MagneticButton from "../components/MagneticButton"
 
 function SignUp() {
   const [name, setName] = useState("")
@@ -53,7 +54,7 @@ function SignUp() {
           <input placeholder="At least 8 characters" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
         </div>
 
-        <button type="submit" className="bg-blue-950 text-white rounded px-3 py-2 mt-2">Sign Up</button>
+        <MagneticButton type="submit" className="mt-2">Sign Up</MagneticButton>
 
         {message && <p className="text-red-600 text-sm">{message}</p>}
       </form>

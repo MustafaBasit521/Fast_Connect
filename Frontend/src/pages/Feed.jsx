@@ -43,7 +43,7 @@ function CommentSection({ postId }) {
   }
 
   return (
-    <div className="mt-3 ml-1 border-l-2 border-gray-100 pl-3 flex flex-col gap-1">
+    <div className="mt-3 ml-1 border-l-2 pl-3 flex flex-col gap-1" style={{ borderColor: "var(--color-border)" }}>
       {comments.map((comment) => (
         <p key={comment.id} className="text-sm">
           <span className="font-semibold">{comment.author_name}: </span>
@@ -52,8 +52,8 @@ function CommentSection({ postId }) {
       ))}
 
       <form onSubmit={handleAddComment} className="flex gap-2 mt-1">
-        <input placeholder="Write a comment..." value={content} onChange={(e) => setContent(e.target.value)} className="border border-gray-300 rounded px-2 py-1 text-sm flex-1" />
-        <button type="submit" className="text-sm text-blue-900 font-medium">Reply</button>
+        <input placeholder="Write a comment..." value={content} onChange={(e) => setContent(e.target.value)} className="border rounded px-2 py-1 text-sm flex-1" style={{ borderColor: "var(--color-border)" }} />
+        <button type="submit" className="text-sm font-medium" style={{ color: "var(--color-accent)" }}>Reply</button>
       </form>
     </div>
   )
@@ -178,11 +178,14 @@ function Feed() {
   }
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-3xl">
       <h1 className="text-2xl font-bold mb-4">Feed</h1>
 
-      <div className="border border-gray-200 rounded-lg p-4 mb-4 flex items-start gap-3">
-        <div className="w-9 h-9 rounded-full bg-blue-950 text-white flex items-center justify-center font-bold text-sm shrink-0">
+      <div className="border rounded-lg p-4 mb-4 flex items-start gap-3" style={{ borderColor: "var(--color-border)" }}>
+        <div
+          className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+          style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+        >
           {initials(user.name)}
         </div>
         <form onSubmit={handleCreate} className="flex-1 flex flex-col gap-2">
@@ -190,7 +193,8 @@ function Feed() {
             placeholder="Share something with your campus..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2"
+            style={{ borderColor: "var(--color-border)" }}
           />
 
           {imagePreview && (
@@ -198,25 +202,37 @@ function Feed() {
           )}
 
           <div className="flex items-center justify-between">
-            <label className="text-sm text-blue-900 cursor-pointer">
-              📷 Add photo
+            <label className="text-sm cursor-pointer flex items-center gap-1.5" style={{ color: "var(--color-accent)" }}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+              </svg>
+              Add photo
               <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
             </label>
 
-            <button type="submit" disabled={uploading} className="bg-blue-950 text-white rounded px-4 py-2 disabled:opacity-50">
+            <button
+              type="submit"
+              disabled={uploading}
+              className="rounded px-4 py-2 disabled:opacity-50"
+              style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+            >
               {uploading ? "Uploading..." : "Post"}
             </button>
           </div>
         </form>
       </div>
 
-      {message && <p className="text-red-600 text-sm mb-2">{message}</p>}
+      {message && <p className="text-sm mb-2" style={{ color: "var(--color-danger)" }}>{message}</p>}
 
       <div className="flex flex-col gap-4">
         {posts.map((post) => (
-          <div key={post.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={post.id} className="border rounded-lg p-4" style={{ borderColor: "var(--color-border)" }}>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm">
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
+                style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+              >
                 {initials(post.author_name)}
               </div>
               <div>
@@ -226,10 +242,16 @@ function Feed() {
 
             {editingId === post.id ? (
               <div className="flex flex-col gap-2">
-                <input value={editContent} onChange={(e) => setEditContent(e.target.value)} className="border border-gray-300 rounded px-3 py-2" />
+                <input value={editContent} onChange={(e) => setEditContent(e.target.value)} className="border rounded px-3 py-2" style={{ borderColor: "var(--color-border)" }} />
                 <div className="flex gap-2">
-                  <button onClick={() => handleSaveEdit(post.id)} className="bg-blue-950 text-white rounded px-3 py-1 text-sm">Save</button>
-                  <button onClick={() => setEditingId(null)} className="text-gray-500 text-sm">Cancel</button>
+                  <button
+                    onClick={() => handleSaveEdit(post.id)}
+                    className="rounded px-3 py-1 text-sm"
+                    style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+                  >
+                    Save
+                  </button>
+                  <button onClick={() => setEditingId(null)} className="text-sm" style={{ color: "var(--color-muted)" }}>Cancel</button>
                 </div>
               </div>
             ) : (
@@ -245,15 +267,15 @@ function Feed() {
               </>
             )}
 
-            <div className="flex gap-4 items-center mt-3 text-sm text-gray-500">
-              <button onClick={() => handleLikeToggle(post)} className={post.liked_by_me ? "text-pink-600 font-medium" : ""}>
-                ♥ {post.likes_count}
+            <div className="flex gap-4 items-center mt-3 text-sm">
+              <button onClick={() => handleLikeToggle(post)} className="font-medium" style={{ color: post.liked_by_me ? "var(--color-coral)" : "var(--color-muted)" }}>
+                {post.liked_by_me ? "❤️" : "🤍"} {post.likes_count}
               </button>
 
               {post.author_id === user.id && editingId !== post.id && (
                 <>
-                  <button onClick={() => startEdit(post)}>Edit</button>
-                  <button onClick={() => handleDelete(post.id)}>Delete</button>
+                  <button onClick={() => startEdit(post)} style={{ color: "var(--color-accent)" }}>Edit</button>
+                  <button onClick={() => handleDelete(post.id)} style={{ color: "var(--color-danger)" }}>Delete</button>
                 </>
               )}
             </div>

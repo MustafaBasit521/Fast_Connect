@@ -51,25 +51,25 @@ function AdminDashboard() {
 
       {stats && (
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <p className="text-sm text-gray-500">Total Users</p>
+          <div className="border rounded-lg p-4" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+            <p className="text-sm" style={{ color: "var(--color-muted)" }}>Total Users</p>
             <p className="text-2xl font-bold">{stats.total_users}</p>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <p className="text-sm text-gray-500">Total Posts</p>
+          <div className="border rounded-lg p-4" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+            <p className="text-sm" style={{ color: "var(--color-muted)" }}>Total Posts</p>
             <p className="text-2xl font-bold">{stats.total_posts}</p>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <p className="text-sm text-gray-500">Restricted</p>
-            <p className="text-2xl font-bold text-red-600">{stats.restricted}</p>
+          <div className="border rounded-lg p-4" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
+            <p className="text-sm" style={{ color: "var(--color-muted)" }}>Restricted</p>
+            <p className="text-2xl font-bold" style={{ color: "var(--color-danger)" }}>{stats.restricted}</p>
           </div>
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+      <div className="border rounded-lg overflow-x-auto" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-200">
+            <tr className="text-left border-b" style={{ color: "var(--color-muted)", borderColor: "var(--color-border)" }}>
               <th className="p-3">Name</th>
               <th className="p-3">Email</th>
               <th className="p-3">Role</th>
@@ -79,12 +79,19 @@ function AdminDashboard() {
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="border-b border-gray-100">
+              <tr key={u.id} className="border-b" style={{ borderColor: "var(--color-border)" }}>
                 <td className="p-3 font-medium">{u.name}</td>
-                <td className="p-3 text-gray-600">{u.email}</td>
+                <td className="p-3" style={{ color: "var(--color-muted)" }}>{u.email}</td>
                 <td className="p-3">{u.role}</td>
                 <td className="p-3">
-                  <span className={u.status === "restricted" ? "text-red-600 bg-red-50 px-2 py-1 rounded text-xs" : "text-green-700 bg-green-50 px-2 py-1 rounded text-xs"}>
+                  <span
+                    className="px-2 py-1 rounded text-xs"
+                    style={
+                      u.status === "restricted"
+                        ? { color: "var(--color-danger)", backgroundColor: "rgba(220,38,38,0.1)" }
+                        : { color: "#15803d", backgroundColor: "rgba(21,128,61,0.1)" }
+                    }
+                  >
                     {u.status}
                   </span>
                 </td>
@@ -92,11 +99,11 @@ function AdminDashboard() {
                   <button
                     onClick={() => handleRestrict(u.id)}
                     disabled={u.status === "restricted"}
-                    className="text-blue-900 disabled:text-gray-300"
+                    style={{ color: u.status === "restricted" ? "var(--color-muted)" : "var(--color-accent)" }}
                   >
                     Restrict
                   </button>
-                  <button onClick={() => handleDelete(u.id)} className="text-red-600">Delete</button>
+                  <button onClick={() => handleDelete(u.id)} style={{ color: "var(--color-danger)" }}>Delete</button>
                 </td>
               </tr>
             ))}

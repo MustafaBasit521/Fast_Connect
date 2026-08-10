@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useLocation, useNavigate, Link } from "react-router-dom"
 import { getErrorMessage } from "../utils/errors"
+import MagneticButton from "../components/MagneticButton"
 
 function ResetPassword() {
   const location = useLocation()
@@ -43,7 +44,7 @@ function ResetPassword() {
           <input placeholder="At least 8 characters" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
         </div>
 
-        <button type="submit" className="bg-blue-950 text-white rounded px-3 py-2">Reset password</button>
+        <MagneticButton type="submit">Reset password</MagneticButton>
 
         {message && <p className="text-red-600 text-sm">{message}</p>}
       </form>

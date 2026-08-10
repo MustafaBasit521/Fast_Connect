@@ -70,7 +70,7 @@ function FriendsPage() {
   ]
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-3xl">
       <h1 className="text-2xl font-bold mb-4">Friends</h1>
 
       <div className="flex gap-2 mb-4">
@@ -78,7 +78,12 @@ function FriendsPage() {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`px-4 py-2 rounded text-sm font-medium ${tab === t.key ? "bg-blue-950 text-white" : "border border-gray-300 text-gray-600"}`}
+            className="px-4 py-2 rounded text-sm font-medium border"
+            style={
+              tab === t.key
+                ? { backgroundColor: "var(--color-primary)", color: "var(--color-bg)", borderColor: "var(--color-primary)" }
+                : { color: "var(--color-muted)", borderColor: "var(--color-border)" }
+            }
           >
             {t.label}
           </button>
@@ -87,18 +92,29 @@ function FriendsPage() {
 
       {tab === "requests" && (
         <div className="flex flex-col gap-3">
-          {requests.length === 0 && <p className="text-gray-500">No pending requests.</p>}
+          {requests.length === 0 && <p style={{ color: "var(--color-muted)" }}>No pending requests.</p>}
           {requests.map((req) => (
-            <div key={req.id} className="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+            <div key={req.id} className="border rounded-lg p-4 flex items-center justify-between" style={{ borderColor: "var(--color-border)" }}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+                  style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+                >
                   {initials(req.from_user_name)}
                 </div>
                 <p className="font-semibold">{req.from_user_name}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => handleAccept(req.id)} className="bg-blue-950 text-white rounded px-3 py-1 text-sm">Accept</button>
-                <button onClick={() => handleDecline(req.id)} className="border border-gray-300 text-gray-600 rounded px-3 py-1 text-sm">Decline</button>
+                <button
+                  onClick={() => handleAccept(req.id)}
+                  className="rounded px-3 py-1 text-sm"
+                  style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+                >
+                  Accept
+                </button>
+                <button onClick={() => handleDecline(req.id)} className="border rounded px-3 py-1 text-sm" style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}>
+                  Decline
+                </button>
               </div>
             </div>
           ))}
@@ -107,18 +123,27 @@ function FriendsPage() {
 
       {tab === "friends" && (
         <div className="flex flex-col gap-3">
-          {friends.length === 0 && <p className="text-gray-500">No friends yet — check Discover.</p>}
+          {friends.length === 0 && <p style={{ color: "var(--color-muted)" }}>No friends yet — check Discover.</p>}
           {friends.map((friend) => (
-            <div key={friend.request_id} className={`border rounded-lg p-4 flex items-center justify-between ${friend.deleted ? "border-gray-200 bg-gray-50" : "border-gray-200"}`}>
+            <div key={friend.request_id} className="border rounded-lg p-4 flex items-center justify-between" style={{ borderColor: "var(--color-border)" }}>
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center font-bold text-sm ${friend.deleted ? "bg-gray-400" : "bg-blue-900"}`}>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+                  style={
+                    friend.deleted
+                      ? { backgroundColor: "var(--color-border)", color: "var(--color-muted)" }
+                      : { backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }
+                  }
+                >
                   {friend.deleted ? "?" : initials(friend.name)}
                 </div>
-                <p className={friend.deleted ? "text-gray-400 italic" : "font-semibold"}>
+                <p className={friend.deleted ? "italic" : "font-semibold"} style={friend.deleted ? { color: "var(--color-muted)" } : undefined}>
                   {friend.deleted ? "Deleted Account" : friend.name}
                 </p>
               </div>
-              <button onClick={() => handleDecline(friend.request_id)} className="border border-gray-300 text-gray-600 rounded px-3 py-1 text-sm">Remove</button>
+              <button onClick={() => handleDecline(friend.request_id)} className="border rounded px-3 py-1 text-sm" style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}>
+                Remove
+              </button>
             </div>
           ))}
         </div>
@@ -126,16 +151,25 @@ function FriendsPage() {
 
       {tab === "discover" && (
         <div className="flex flex-col gap-3">
-          {discoverable.length === 0 && <p className="text-gray-500">No one new to discover right now.</p>}
+          {discoverable.length === 0 && <p style={{ color: "var(--color-muted)" }}>No one new to discover right now.</p>}
           {discoverable.map((person) => (
-            <div key={person.id} className="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+            <div key={person.id} className="border rounded-lg p-4 flex items-center justify-between" style={{ borderColor: "var(--color-border)" }}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-sm">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+                  style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+                >
                   {initials(person.name)}
                 </div>
                 <p className="font-semibold">{person.name}</p>
               </div>
-              <button onClick={() => handleSendRequest(person.id)} className="bg-amber-500 text-blue-950 font-medium rounded px-3 py-1 text-sm">Add Friend</button>
+              <button
+                onClick={() => handleSendRequest(person.id)}
+                className="font-medium rounded px-3 py-1 text-sm"
+                style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
+              >
+                Add Friend
+              </button>
             </div>
           ))}
         </div>

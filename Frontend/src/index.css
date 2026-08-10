@@ -1,1 +1,95 @@
 @import "tailwindcss";
+
+:root {
+  --color-primary: #2d3a5c;
+  --color-bg: #faf8f5;
+  --color-accent: #d4a853;
+  --color-coral: #e07a5f;
+  --color-text: #44403c;
+  --color-surface: #ffffff;
+  --color-border: #e5e1da;
+  --color-muted: #78716c;
+  --color-danger: #dc2626;
+  --color-panel: #2d3a5c;
+  --color-panel-text: #ffffff;
+}
+
+[data-theme="dark"] {
+  --color-primary: #d4a853;
+  --color-bg: #0f1421;
+  --color-accent: #d4a853;
+  --color-coral: #e07a5f;
+  --color-text: #f3f4f6;
+  --color-surface: #161d2e;
+  --color-border: #232b3d;
+  --color-muted: #9ca3af;
+  --color-danger: #dc2626;
+  --color-panel: #161d2e;
+  --color-panel-text: #f3f4f6;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+input,
+textarea {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* Floating particles — wandering "dragonfly" drift, not a straight rise */
+.particle {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  animation: driftFloat ease-in-out infinite;
+}
+@keyframes driftFloat {
+  0%   { transform: translate(0, 0); opacity: 0.25; }
+  20%  { transform: translate(18px, -25px); opacity: 0.7; }
+  40%  { transform: translate(-14px, -50px); opacity: 0.4; }
+  60%  { transform: translate(12px, -80px); opacity: 0.6; }
+  80%  { transform: translate(-10px, -105px); opacity: 0.3; }
+  100% { transform: translate(0, -130px); opacity: 0; }
+}
+
+/* Fireflies (dark theme, auth pages) */
+.firefly {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #fbbf24;
+  box-shadow: 0 0 6px #fbbf24, 0 0 12px #fbbf24;
+  animation: fireflyFloat 6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes fireflyFloat {
+  0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+  25% { transform: translate(10px, -15px); opacity: 1; }
+  50% { transform: translate(-8px, -25px); opacity: 0.6; }
+  75% { transform: translate(6px, -10px); opacity: 1; }
+}
+
+/* Typewriter heading */
+.typewriter {
+  border-right: 2px solid currentColor;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: blinkCursor 0.8s step-end infinite;
+}
+@keyframes blinkCursor {
+  0%, 100% { border-color: transparent; }
+  50% { border-color: currentColor; }
+}
+
+/* Magnetic buttons — gradient adapted to the navy/gold palette instead of a mismatched purple */
+.magnetic-btn {
+  background: linear-gradient(135deg, var(--color-panel), var(--color-accent));
+  color: var(--color-panel-text);
+  transition: transform 0.15s ease-out;
+  box-shadow: 0 4px 20px rgba(212, 168, 83, 0.35);
+}
