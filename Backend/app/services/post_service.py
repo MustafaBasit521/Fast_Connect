@@ -75,6 +75,9 @@ async def update_post(post_id: str, current_user_id: str, data: PostUpdate) -> P
         await db["posts"].update_one({"_id": object_id}, {"$set": update_data})
 
     post = await db["posts"].find_one({"_id": object_id})
+    if post is None:
+        raise ValueError("Post not found")
+
     return _to_post_out(post, current_user_id)
 
 

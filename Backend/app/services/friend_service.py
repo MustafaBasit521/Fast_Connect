@@ -72,6 +72,9 @@ async def accept_request(request_id: str, current_user_id: str) -> FriendRequest
     await db["friend_requests"].update_one({"_id": object_id}, {"$set": {"status": "accepted"}})
 
     request = await db["friend_requests"].find_one({"_id": object_id})
+    if request is None:
+        raise ValueError("Request not found")
+
     return _to_request_out(request)
 
 

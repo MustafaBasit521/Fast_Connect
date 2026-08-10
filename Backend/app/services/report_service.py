@@ -56,4 +56,7 @@ async def resolve_report(report_id: str) -> ReportOut:
     await db["reports"].update_one({"_id": object_id}, {"$set": {"status": "reviewed"}})
 
     report = await db["reports"].find_one({"_id": object_id})
+    if report is None:
+        raise ValueError("Report not found")
+
     return _to_report_out(report)

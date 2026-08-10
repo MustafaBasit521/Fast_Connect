@@ -68,6 +68,9 @@ async def update_comment(comment_id: str, current_user_id: str, data: CommentUpd
     await db["comments"].update_one({"_id": object_id}, {"$set": {"content": data.content}})
 
     comment = await db["comments"].find_one({"_id": object_id})
+    if comment is None:
+        raise ValueError("Comment not found")
+
     return _to_comment_out(comment)
 
 
