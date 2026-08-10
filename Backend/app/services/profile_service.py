@@ -62,3 +62,17 @@ async def delete_profile(email: str):
 
     await cascade_delete_user_data(user_id)
     await db["users"].delete_one({"_id": user["_id"]})
+
+async def search_users(query: str, current_user_id: str) -> list[UserOut]:
+    cursor = db["users"].find({
+        "name": {"$regex": query, "$options": "i"},
+        "_id": {"$ne": ObjectId(current_user_id)},
+    })
+
+    users = []
+    async for user in cursor:
+        users.append(_to_user_out(user))
+
+    return users
+
+

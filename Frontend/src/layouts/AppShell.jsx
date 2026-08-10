@@ -10,6 +10,7 @@ const navItems = [
   { to: "/feed", label: "Feed" },
   { to: "/friends", label: "Friends" },
   { to: "/messages", label: "Messages" },
+  { to: "/search", label: "Search" },
   { to: "/profile", label: "Profile" },
 ]
 

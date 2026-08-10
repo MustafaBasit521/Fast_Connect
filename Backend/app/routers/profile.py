@@ -7,6 +7,11 @@ from app.dependencies import get_current_user
 router = APIRouter()
 
 
+@router.get("/search", response_model=list[UserOut])
+async def search_profiles(q: str, current_user: UserOut = Depends(get_current_user)):
+    return await profile_service.search_users(q, current_user.id)
+
+
 @router.get("/{user_id}", response_model=UserOut)
 async def view_profile(user_id: str):
     profile = await profile_service.get_profile(user_id)

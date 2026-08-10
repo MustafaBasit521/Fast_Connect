@@ -16,6 +16,8 @@ import Feed from "./pages/Feed"
 import FriendsPage from "./pages/FriendsPage"
 import MessagesPage from "./pages/MessagesPage"
 import MyProfile from "./pages/MyProfile"
+import SearchProfile from "./pages/SearchProfile"
+import ViewProfile from "./pages/ViewProfile"
 import AdminDashboard from "./pages/AdminDashboard"
 
 function App() {
@@ -42,6 +44,8 @@ function App() {
               <Route path="/friends" element={<FriendsPage />} />
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/profile" element={<MyProfile />} />
+              <Route path="/search" element={<SearchProfile />} />
+              <Route path="/profile/:userId" element={<ViewProfile />} />
             </Route>
 
             <Route
