@@ -32,7 +32,7 @@ function SearchProfile() {
   }
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Search Profiles</h1>
 
       <form onSubmit={handleSearch} className="flex gap-2 mb-4">

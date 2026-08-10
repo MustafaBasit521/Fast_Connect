@@ -178,10 +178,10 @@ function Feed() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Feed</h1>
 
-      <div className="border rounded-lg p-4 mb-4 flex items-start gap-3" style={{ borderColor: "var(--color-border)" }}>
+      <div className="post-card border rounded-lg p-4 mb-4 flex items-start gap-3" style={{ borderColor: "var(--color-border)" }}>
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
           style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
@@ -227,7 +227,7 @@ function Feed() {
 
       <div className="flex flex-col gap-4">
         {posts.map((post) => (
-          <div key={post.id} className="border rounded-lg p-4" style={{ borderColor: "var(--color-border)" }}>
+          <div key={post.id} className="post-card border rounded-lg p-4" style={{ borderColor: "var(--color-border)" }}>
             <div className="flex items-center gap-3 mb-2">
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"

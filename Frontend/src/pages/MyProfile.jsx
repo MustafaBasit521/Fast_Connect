@@ -94,7 +94,7 @@ function MyProfile() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">My Profile &amp; Settings</h1>
 
       <div className="border rounded-lg p-6 mb-4" style={{ borderColor: "var(--color-border)" }}>
