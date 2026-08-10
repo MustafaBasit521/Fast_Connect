@@ -22,10 +22,20 @@ async def create_user(user: UserSignUp):
 
     user_data = user.model_dump()
     user_data["password"] = hashed_password.decode("utf-8")
+    user_data["role"] = "user"
+    user_data["status"] = "active"
 
     result = await db["users"].insert_one(user_data)
 
-    return UserOut(id=str(result.inserted_id), name=user.name, email=user.email, bio=user.bio, phone=user.phone)
+    return UserOut(
+        id=str(result.inserted_id),
+        name=user.name,
+        email=user.email,
+        bio=user.bio,
+        phone=user.phone,
+        role="user",
+        status="active",
+    )
 
 
 async def authenticate_user(credentials: UserLogin):
@@ -42,12 +52,17 @@ async def authenticate_user(credentials: UserLogin):
     if not password_matches:
         return None
 
+    if existing.get("status") == "restricted":
+        raise ValueError("Your account has been restricted")
+
     return UserOut(
         id=str(existing["_id"]),
         name=existing["name"],
         email=existing["email"],
         bio=existing.get("bio"),
         phone=existing.get("phone"),
+        role=existing.get("role", "user"),
+        status=existing.get("status", "active"),
     )
 
 def create_access_token(data: dict) -> str:

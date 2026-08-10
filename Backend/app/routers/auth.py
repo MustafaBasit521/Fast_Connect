@@ -18,7 +18,10 @@ async def signup(user: UserSignUp):
 
 @router.post("/login")
 async def login(credentials: UserLogin):
-    result = await auth_service.authenticate_user(credentials)
+    try:
+        result = await auth_service.authenticate_user(credentials)
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e))
 
     if result is None:
         raise HTTPException(status_code=401, detail="Invalid email or password")

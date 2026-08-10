@@ -3,6 +3,9 @@ import Login from "./pages/Login"
 import ChangePassword from "./pages/ChangePassword"
 import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
+import MyProfile from "./pages/MyProfile"
+import ViewProfile from "./pages/ViewProfile"
+import Feed from "./pages/Feed"
 
 function App() {
   return (
@@ -13,6 +16,9 @@ function App() {
       <ChangePassword />
       <ForgotPassword />
       <ResetPassword />
+      <MyProfile />
+      <ViewProfile />
+      <Feed />
     </div>
   )
 }

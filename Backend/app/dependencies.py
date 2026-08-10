@@ -25,10 +25,22 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
 
+    if user.get("status") == "restricted":
+        raise HTTPException(status_code=403, detail="Your account has been restricted")
+
     return UserOut(
         id=str(user["_id"]),
         name=user["name"],
         email=user["email"],
         bio=user.get("bio"),
         phone=user.get("phone"),
+        role=user.get("role", "user"),
+        status=user.get("status", "active"),
     )
+
+
+async def get_current_admin(current_user: UserOut = Depends(get_current_user)) -> UserOut:
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin privileges required")
+
+    return current_user

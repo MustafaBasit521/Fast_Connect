@@ -5,6 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.connection import db
 from app.routers.auth import router as auth_router
+from app.routers.profile import router as profile_router
+from app.routers.post import router as post_router
+from app.routers.comment import router as comment_router
+from app.routers.friend import router as friend_router
+from app.routers.message import router as message_router
+from app.routers.blog import router as blog_router
+from app.routers.report import router as report_router
+from app.routers.feedback import router as feedback_router
+from app.routers.admin import router as admin_router
 
 app = FastAPI()
 
@@ -17,6 +26,15 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(profile_router, prefix="/profile", tags=["profile"])
+app.include_router(post_router, prefix="/posts", tags=["posts"])
+app.include_router(comment_router, tags=["comments"])
+app.include_router(friend_router, prefix="/friends", tags=["friends"])
+app.include_router(message_router, prefix="/messages", tags=["messages"])
+app.include_router(blog_router, prefix="/blogs", tags=["blogs"])
+app.include_router(report_router, prefix="/reports", tags=["reports"])
+app.include_router(feedback_router, prefix="/feedback", tags=["feedback"])
+app.include_router(admin_router, prefix="/admin", tags=["admin"])
 
 
 @app.get("/")

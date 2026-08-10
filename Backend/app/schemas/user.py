@@ -10,6 +10,8 @@ class UserOut(BaseModel):
     email: EmailStr
     bio: Optional[str] = None
     phone: Optional[str] = None
+    role: str = "user"
+    status: str = "active"
 
 class UserSignUp(BaseModel):
     name:str=Field(...,min_length=3,description='Enter your name')

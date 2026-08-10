@@ -12,6 +12,8 @@ def _to_user_out(user: dict) -> UserOut:
         email=user["email"],
         bio=user.get("bio"),
         phone=user.get("phone"),
+        role=user.get("role", "user"),
+        status=user.get("status", "active"),
     )
 
 
@@ -35,6 +37,9 @@ async def update_profile(email: str, data: ProfileUpdate) -> UserOut:
         await db["users"].update_one({"email": email}, {"$set": update_data})
 
     user = await db["users"].find_one({"email": email})
+    if user is None:
+        raise ValueError("User not found")
+
     return _to_user_out(user)
 
 
