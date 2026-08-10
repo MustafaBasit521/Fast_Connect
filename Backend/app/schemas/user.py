@@ -20,13 +20,24 @@ class UserSignUp(BaseModel):
     @classmethod
     def validate_university_email(cls, value):
         if not value.endswith("@lhr.nu.edu.pk"):
-            raise ValueError("Email must be a valid FAST Lahore campus email (@lhr.nu.edu.pk)")
+            raise ValueError("Email must be a valid FAST Lahore campus email ")
         return value
 
 class UserLogin(BaseModel):
     email:EmailStr=Field(...,description='Enter your email address')
     password:str=Field(...,min_length=8,description='Enter your password')
 
-    
+class ChangePassword(BaseModel):
+    old_password:str =Field(...,min_length=8)
+    new_password:str =Field(...,min_length=8)
+
+class ForgotPassword(BaseModel):
+    email:EmailStr
+
+class ResetPassword(BaseModel):
+    token:str
+    new_password:str=Field(...,min_length=8)
+
+
 
 
