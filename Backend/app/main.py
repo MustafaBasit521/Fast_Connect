@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+app = FastAPI()
 
 from app.database.connection import db
 from app.routers.auth import router as auth_router
@@ -17,11 +17,13 @@ from app.routers.feedback import router as feedback_router
 from app.routers.admin import router as admin_router
 from app.routers.upload import router as upload_router
 
-app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://fast-connect-frontend-three.vercel.app"],
+    allow_origins=[
+        "https://fast-connect-frontend-three.vercel.app",
+        "http://localhost:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,8 +41,6 @@ app.include_router(feedback_router, prefix="/feedback", tags=["feedback"])
 app.include_router(admin_router, prefix="/admin", tags=["admin"])
 app.include_router(upload_router, prefix="/uploads", tags=["uploads"])
 
-
-app.mount("/media", StaticFiles(directory="/tmp/uploads"), name="media")
 
 @app.get("/")
 async def root():

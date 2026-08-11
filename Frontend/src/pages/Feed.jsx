@@ -259,7 +259,7 @@ function Feed() {
                 <p>{post.content}</p>
                 {post.image_url && (
                   <img
-                    src={`https://fast-connect-bay.vercel.app${post.image_url}`}
+                    src={post.image_url}
                     alt="Post attachment"
                     className="w-full h-auto rounded-lg mt-2"
                   />
