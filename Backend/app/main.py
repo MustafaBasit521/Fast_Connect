@@ -39,8 +39,8 @@ app.include_router(feedback_router, prefix="/feedback", tags=["feedback"])
 app.include_router(admin_router, prefix="/admin", tags=["admin"])
 app.include_router(upload_router, prefix="/uploads", tags=["uploads"])
 
-app.mount("/media", StaticFiles(directory="uploads"), name="media")
 
+app.mount("/media", StaticFiles(directory="/tmp/uploads"), name="media")
 
 @app.get("/")
 async def root():
