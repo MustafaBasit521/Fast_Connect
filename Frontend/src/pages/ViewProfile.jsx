@@ -16,7 +16,7 @@ function ViewProfile() {
 
   useEffect(() => {
     async function loadProfile() {
-      const response = await fetch(`http://127.0.0.1:8000/profile/${userId}`, {
+      const response = await fetch(`https://fast-connect-bay.vercel.app/profile/${userId}`, {
         headers: authHeaders(),
       })
       const data = await response.json()

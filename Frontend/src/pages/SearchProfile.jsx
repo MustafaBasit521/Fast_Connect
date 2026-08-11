@@ -17,7 +17,7 @@ function SearchProfile() {
     e.preventDefault()
     if (!query.trim()) return
 
-    const response = await fetch(`http://127.0.0.1:8000/profile/search?q=${encodeURIComponent(query)}`, {
+    const response = await fetch(`https://fast-connect-bay.vercel.app/profile/search?q=${encodeURIComponent(query)}`, {
       headers: authHeaders(),
     })
     const data = await response.json()

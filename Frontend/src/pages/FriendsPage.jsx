@@ -16,17 +16,17 @@ function FriendsPage() {
   const [discoverable, setDiscoverable] = useState([])
 
   async function loadRequests() {
-    const response = await fetch("http://127.0.0.1:8000/friends/requests", { headers: authHeaders() })
+    const response = await fetch("https://fast-connect-bay.vercel.app/friends/requests", { headers: authHeaders() })
     if (response.ok) setRequests(await response.json())
   }
 
   async function loadFriends() {
-    const response = await fetch("http://127.0.0.1:8000/friends", { headers: authHeaders() })
+    const response = await fetch("https://fast-connect-bay.vercel.app/friends", { headers: authHeaders() })
     if (response.ok) setFriends(await response.json())
   }
 
   async function loadDiscover() {
-    const response = await fetch("http://127.0.0.1:8000/friends/discover", { headers: authHeaders() })
+    const response = await fetch("https://fast-connect-bay.vercel.app/friends/discover", { headers: authHeaders() })
     if (response.ok) setDiscoverable(await response.json())
   }
 
@@ -37,7 +37,7 @@ function FriendsPage() {
   }, [])
 
   async function handleAccept(requestId) {
-    await fetch(`http://127.0.0.1:8000/friends/requests/${requestId}/accept`, {
+    await fetch(`https://fast-connect-bay.vercel.app/friends/requests/${requestId}/accept`, {
       method: "PUT",
       headers: authHeaders(),
     })
@@ -46,7 +46,7 @@ function FriendsPage() {
   }
 
   async function handleDecline(requestId) {
-    await fetch(`http://127.0.0.1:8000/friends/requests/${requestId}`, {
+    await fetch(`https://fast-connect-bay.vercel.app/friends/requests/${requestId}`, {
       method: "DELETE",
       headers: authHeaders(),
     })
@@ -55,7 +55,7 @@ function FriendsPage() {
   }
 
   async function handleSendRequest(userId) {
-    await fetch(`http://127.0.0.1:8000/friends/requests/${userId}`, {
+    await fetch(`https://fast-connect-bay.vercel.app/friends/requests/${userId}`, {
       method: "POST",
       headers: authHeaders(),
     })

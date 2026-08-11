@@ -16,7 +16,7 @@ function CommentSection({ postId }) {
   const [content, setContent] = useState("")
 
   async function loadComments() {
-    const response = await fetch(`http://127.0.0.1:8000/posts/${postId}/comments`, {
+    const response = await fetch(`https://fast-connect-bay.vercel.app/posts/${postId}/comments`, {
       headers: authHeaders(),
     })
     const data = await response.json()
@@ -32,7 +32,7 @@ function CommentSection({ postId }) {
   async function handleAddComment(e) {
     e.preventDefault()
 
-    await fetch(`http://127.0.0.1:8000/posts/${postId}/comments`, {
+    await fetch(`https://fast-connect-bay.vercel.app/posts/${postId}/comments`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ content }),
@@ -79,7 +79,7 @@ function Feed() {
   }
 
   async function loadFeed() {
-    const response = await fetch("http://127.0.0.1:8000/posts", {
+    const response = await fetch("https://fast-connect-bay.vercel.app/posts", {
       headers: authHeaders(),
     })
     const data = await response.json()
@@ -107,7 +107,7 @@ function Feed() {
       const formData = new FormData()
       formData.append("file", imageFile)
 
-      const uploadResponse = await fetch("http://127.0.0.1:8000/uploads/image", {
+      const uploadResponse = await fetch("https://fast-connect-bay.vercel.app/uploads/image", {
         method: "POST",
         headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
         body: formData,
@@ -124,7 +124,7 @@ function Feed() {
       imageUrl = uploadData.url
     }
 
-    const response = await fetch("http://127.0.0.1:8000/posts", {
+    const response = await fetch("https://fast-connect-bay.vercel.app/posts", {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ content, image_url: imageUrl }),
@@ -142,7 +142,7 @@ function Feed() {
   }
 
   async function handleDelete(postId) {
-    await fetch(`http://127.0.0.1:8000/posts/${postId}`, {
+    await fetch(`https://fast-connect-bay.vercel.app/posts/${postId}`, {
       method: "DELETE",
       headers: authHeaders(),
     })
@@ -151,7 +151,7 @@ function Feed() {
 
   async function handleLikeToggle(post) {
     const method = post.liked_by_me ? "DELETE" : "POST"
-    await fetch(`http://127.0.0.1:8000/posts/${post.id}/like`, {
+    await fetch(`https://fast-connect-bay.vercel.app/posts/${post.id}/like`, {
       method,
       headers: authHeaders(),
     })
@@ -164,7 +164,7 @@ function Feed() {
   }
 
   async function handleSaveEdit(postId) {
-    await fetch(`http://127.0.0.1:8000/posts/${postId}`, {
+    await fetch(`https://fast-connect-bay.vercel.app/posts/${postId}`, {
       method: "PUT",
       headers: authHeaders(),
       body: JSON.stringify({ content: editContent }),
@@ -259,7 +259,7 @@ function Feed() {
                 <p>{post.content}</p>
                 {post.image_url && (
                   <img
-                    src={`http://127.0.0.1:8000${post.image_url}`}
+                    src={`https://fast-connect-bay.vercel.app${post.image_url}`}
                     alt="Post attachment"
                     className="w-full h-auto rounded-lg mt-2"
                   />

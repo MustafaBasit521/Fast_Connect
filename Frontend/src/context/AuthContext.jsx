@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
       return
     }
 
-    const response = await fetch("http://127.0.0.1:8000/auth/me", {
+    const response = await fetch("https://fast-connect-bay.vercel.app/auth/me", {
       headers: { "Authorization": `Bearer ${token}` },
     })
 

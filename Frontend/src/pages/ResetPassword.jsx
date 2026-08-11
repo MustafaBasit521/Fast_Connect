@@ -13,7 +13,7 @@ function ResetPassword() {
   async function handleSubmit(e) {
     e.preventDefault()
 
-    const response = await fetch("http://127.0.0.1:8000/auth/reset-password", {
+    const response = await fetch("https://fast-connect-bay.vercel.app/auth/reset-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, new_password: newPassword }),

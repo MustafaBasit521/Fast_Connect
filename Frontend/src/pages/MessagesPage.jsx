@@ -17,7 +17,7 @@ function MessagesPage() {
 
   useEffect(() => {
     async function loadFriends() {
-      const response = await fetch("http://127.0.0.1:8000/friends", { headers: authHeaders() })
+      const response = await fetch("https://fast-connect-bay.vercel.app/friends", { headers: authHeaders() })
       if (response.ok) {
         const data = await response.json()
         setFriends(data)
@@ -29,7 +29,7 @@ function MessagesPage() {
   }, [])
 
   async function loadMessages(friendId) {
-    const response = await fetch(`http://127.0.0.1:8000/messages/${friendId}`, { headers: authHeaders() })
+    const response = await fetch(`https://fast-connect-bay.vercel.app/messages/${friendId}`, { headers: authHeaders() })
     if (response.ok) setMessages(await response.json())
   }
 
@@ -41,7 +41,7 @@ function MessagesPage() {
     e.preventDefault()
     if (!text.trim() || !selected) return
 
-    await fetch(`http://127.0.0.1:8000/messages/${selected.id}`, {
+    await fetch(`https://fast-connect-bay.vercel.app/messages/${selected.id}`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ content: text }),

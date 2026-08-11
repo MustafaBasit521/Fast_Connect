@@ -13,12 +13,12 @@ function AdminDashboard() {
   const [users, setUsers] = useState([])
 
   async function loadStats() {
-    const response = await fetch("http://127.0.0.1:8000/admin/stats", { headers: authHeaders() })
+    const response = await fetch("https://fast-connect-bay.vercel.app/admin/stats", { headers: authHeaders() })
     if (response.ok) setStats(await response.json())
   }
 
   async function loadUsers() {
-    const response = await fetch("http://127.0.0.1:8000/admin/users", { headers: authHeaders() })
+    const response = await fetch("https://fast-connect-bay.vercel.app/admin/users", { headers: authHeaders() })
     if (response.ok) setUsers(await response.json())
   }
 
@@ -28,7 +28,7 @@ function AdminDashboard() {
   }, [])
 
   async function handleRestrict(userId) {
-    await fetch(`http://127.0.0.1:8000/admin/users/${userId}/restrict`, {
+    await fetch(`https://fast-connect-bay.vercel.app/admin/users/${userId}/restrict`, {
       method: "PUT",
       headers: authHeaders(),
     })
@@ -37,7 +37,7 @@ function AdminDashboard() {
   }
 
   async function handleDelete(userId) {
-    await fetch(`http://127.0.0.1:8000/admin/users/${userId}`, {
+    await fetch(`https://fast-connect-bay.vercel.app/admin/users/${userId}`, {
       method: "DELETE",
       headers: authHeaders(),
     })

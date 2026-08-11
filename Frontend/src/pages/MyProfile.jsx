@@ -33,7 +33,7 @@ function MyProfile() {
 
     const token = localStorage.getItem("token")
 
-    const response = await fetch("http://127.0.0.1:8000/profile/me", {
+    const response = await fetch("https://fast-connect-bay.vercel.app/profile/me", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -57,7 +57,7 @@ function MyProfile() {
 
     const token = localStorage.getItem("token")
 
-    const response = await fetch("http://127.0.0.1:8000/auth/change-password", {
+    const response = await fetch("https://fast-connect-bay.vercel.app/auth/change-password", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -80,7 +80,7 @@ function MyProfile() {
   async function handleDelete() {
     const token = localStorage.getItem("token")
 
-    await fetch("http://127.0.0.1:8000/profile/me", {
+    await fetch("https://fast-connect-bay.vercel.app/profile/me", {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` },
     })
