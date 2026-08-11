@@ -64,5 +64,5 @@ async def upload_image(
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail="Image upload failed"
+            detail=f"Image upload failed: {e}"
         )
