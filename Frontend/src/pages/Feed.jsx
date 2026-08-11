@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { initials } from "../utils/initials"
 import { getErrorMessage } from "../utils/errors"
+import FlipClock from "../components/FlipClock"
 
 function authHeaders() {
   const token = localStorage.getItem("token")
@@ -178,8 +179,10 @@ function Feed() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Feed</h1>
+    <div className="max-w-6xl mx-auto flex gap-8">
+      {/* Main Feed Column */}
+      <div className="flex-1 max-w-3xl">
+        <h1 className="text-2xl font-bold mb-4">Feed</h1>
 
       <div className="post-card border rounded-lg p-4 mb-4 flex items-start gap-3" style={{ borderColor: "var(--color-border)" }}>
         <div
@@ -283,6 +286,18 @@ function Feed() {
             <CommentSection postId={post.id} />
           </div>
         ))}
+      </div>
+      </div>
+
+      {/* Right Sidebar */}
+      <div className="w-80 shrink-0 hidden md:flex flex-col gap-8 mt-[3.2rem]">
+        <FlipClock />
+        
+        {/* Trending Topics Placeholder Box */}
+        <div className="p-5 rounded-xl" style={{ backgroundColor: "var(--color-bg, #1a1a2e)", border: "1px solid var(--color-border, #333)" }}>
+           <h2 className="text-lg font-bold mb-3">Trending Campus Topics</h2>
+           <p className="text-sm text-gray-400">Loading trends...</p>
+        </div>
       </div>
     </div>
   )
