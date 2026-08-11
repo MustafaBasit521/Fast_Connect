@@ -1,6 +1,8 @@
 import os
 import uuid
 
+UPLOAD_DIR = "/tmp/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 
 from app.schemas.user import UserOut
@@ -8,11 +10,9 @@ from app.dependencies import get_current_user
 
 router = APIRouter()
 
-UPLOAD_DIR = "uploads"
+
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 MAX_SIZE = 5 * 1024 * 1024
-
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.post("/image")
