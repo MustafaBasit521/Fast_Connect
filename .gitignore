@@ -1,6 +1,17 @@
+# Python virtual environment
 venv/
+
+# Environment variables / secrets
 .env
+.env.*
+!.env.example
+
+# Python cache
 __pycache__/
 *.pyc
-LEARNING_NOTES.md
+
+# Local uploaded files
 Backend/uploads/
+
+# Personal learning notes
+LEARNING_NOTES.md
