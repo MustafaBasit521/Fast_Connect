@@ -7,6 +7,7 @@ import ReportButton from "../components/ReportButton"
 import FlipClock from "../components/FlipClock"
 import { PostSkeleton } from "../components/Skeleton"
 import { EmptyState } from "../components/EmptyState"
+import { SuggestionsBox } from "../components/SuggestionsBox"
 import { useToast } from "../context/ToastContext"
 
 function authHeaders() {
@@ -81,6 +82,7 @@ function Feed() {
   const [editingId, setEditingId] = useState(null)
   const [editContent, setEditContent] = useState("")
   const [loading, setLoading] = useState(true)
+  const [trending, setTrending] = useState([])
 
   function handleImageSelect(e) {
     const file = e.target.files[0]
@@ -105,6 +107,24 @@ function Feed() {
 
     if (response.ok) {
       setPosts(data)
+      
+      // Calculate real trending hashtags from posts
+      const hashtagCounts = {}
+      data.forEach(post => {
+        const words = (post.content || "").split(/\s+/)
+        words.forEach(word => {
+          if (word.startsWith("#") && word.length > 1) {
+            hashtagCounts[word] = (hashtagCounts[word] || 0) + 1
+          }
+        })
+      })
+      
+      const sortedTags = Object.entries(hashtagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(entry => entry[0])
+        
+      setTrending(sortedTags)
     } else {
       addToast(getErrorMessage(data), "error")
     }
@@ -339,13 +359,44 @@ function Feed() {
       </div>
 
       {/* Right Sidebar */}
-      <div className="w-80 shrink-0 hidden md:flex flex-col gap-8 mt-[3.2rem]">
+      <div className="w-80 shrink-0 hidden md:flex flex-col gap-6 mt-[3.2rem]">
         <FlipClock />
         
-        {/* Trending Topics Placeholder Box */}
+        {/* Trending Topics Box */}
         <div className="p-5 rounded-xl" style={{ backgroundColor: "var(--color-bg, #1a1a2e)", border: "1px solid var(--color-border, #333)" }}>
-           <h2 className="text-lg font-bold mb-3">Trending Campus Topics</h2>
-           <p className="text-sm text-gray-400">Loading trends...</p>
+           <div className="flex justify-between items-center mb-4">
+             <h2 className="text-sm font-bold text-gray-400">Trending Topics</h2>
+             <Link to="/trending" className="text-xs font-semibold hover:opacity-70" style={{ color: "var(--color-primary)" }}>See All</Link>
+           </div>
+           
+           <div className="flex flex-col gap-3">
+             {trending.length > 0 ? (
+               trending.map((tag, idx) => (
+                 <div key={idx} className="flex flex-col">
+                   <span className="text-xs text-gray-500">{idx + 1}. Campus Trend</span>
+                   <span className="font-semibold text-sm">{tag}</span>
+                 </div>
+               ))
+             ) : (
+               <p className="text-xs text-gray-500 italic">No trending topics right now. Post with a hashtag to start a trend!</p>
+             )}
+           </div>
+        </div>
+
+        <SuggestionsBox />
+
+        {/* Instagram-style Footer */}
+        <div className="mt-4 text-xs text-gray-500 flex flex-col gap-2 px-2">
+          <div className="flex gap-x-3 gap-y-1 flex-wrap">
+            <a href="#" className="hover:underline">About</a>
+            <a href="#" className="hover:underline">Help</a>
+            <a href="#" className="hover:underline">Press</a>
+            <a href="#" className="hover:underline">API</a>
+            <a href="#" className="hover:underline">Jobs</a>
+            <a href="#" className="hover:underline">Privacy</a>
+            <a href="#" className="hover:underline">Terms</a>
+          </div>
+          <p className="mt-2">© 2026 FAST Connect from Mustafa</p>
         </div>
       </div>
     </div>

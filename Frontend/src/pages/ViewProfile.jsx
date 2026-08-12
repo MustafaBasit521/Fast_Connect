@@ -18,6 +18,8 @@ function ViewProfile() {
   const [message, setMessage] = useState("")
   const [posts, setPosts] = useState([])
   const [loadingPosts, setLoadingPosts] = useState(true)
+  const [isFriend, setIsFriend] = useState(false)
+  const [checkingFriendship, setCheckingFriendship] = useState(true)
 
   useEffect(() => {
     async function loadProfile() {
@@ -29,6 +31,16 @@ function ViewProfile() {
       if (response.ok) {
         setProfile(data)
         setMessage("")
+        
+        // Check friendship status
+        const friendsRes = await fetch("https://fast-connect-bay.vercel.app/friends", { headers: authHeaders() })
+        if (friendsRes.ok) {
+           const friendsList = await friendsRes.json()
+           // Assuming the backend returns name, we match by name or id.
+           const isF = friendsList.some(f => f.name === data.name || f.id === data.id)
+           setIsFriend(isF)
+        }
+        setCheckingFriendship(false)
       } else {
         setProfile(null)
         setMessage(getErrorMessage(data))
@@ -80,7 +92,12 @@ function ViewProfile() {
           )}
           
           <div className="flex justify-center sm:justify-start gap-3 mt-auto">
-             <button className="px-6 py-2 rounded-lg font-bold text-sm transition-transform hover:scale-105" style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}>Follow</button>
+             <button className="px-6 py-2 rounded-lg font-bold text-sm transition-transform hover:scale-105" style={{ backgroundColor: isFriend ? "var(--color-surface)" : "var(--color-primary)", color: isFriend ? "var(--color-text)" : "var(--color-bg)", border: isFriend ? "1px solid var(--color-border)" : "none" }}>
+               {isFriend ? "Followed" : "Follow"}
+             </button>
+             <button className="px-6 py-2 rounded-lg font-bold text-sm transition-transform hover:scale-105 border" style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}>
+               Message
+             </button>
              <ReportButton targetType="user" targetId={profile.id} />
           </div>
         </div>
@@ -88,9 +105,17 @@ function ViewProfile() {
       
       {/* User Posts Section */}
       <div className="mt-4">
-        <h2 className="text-xl font-bold mb-6 border-b pb-3" style={{ borderColor: "var(--color-border)" }}>Posts by {profile.name}</h2>
-        <div className="flex flex-col gap-6">
-          {loadingPosts ? (
+        <h2 className="text-xl font-bold mb-6 border-b pb-3" style={{ borderColor: "var(--color-border)" }}>Posts</h2>
+        
+        {!checkingFriendship && !isFriend ? (
+          <EmptyState 
+            icon="🔒" 
+            title="This account is private" 
+            message="Follow this account to see their photos and videos." 
+          />
+        ) : (
+          <div className="flex flex-col gap-6">
+            {loadingPosts ? (
             <>
               <PostSkeleton />
               <PostSkeleton />
@@ -121,6 +146,7 @@ function ViewProfile() {
             ))
           )}
         </div>
+        )}
       </div>
     </div>
   )

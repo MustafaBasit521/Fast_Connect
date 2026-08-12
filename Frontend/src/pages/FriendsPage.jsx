@@ -13,7 +13,6 @@ function FriendsPage() {
   const [tab, setTab] = useState("friends")
   const [requests, setRequests] = useState([])
   const [friends, setFriends] = useState([])
-  const [discoverable, setDiscoverable] = useState([])
 
   async function loadRequests() {
     const response = await fetch("https://fast-connect-bay.vercel.app/friends/requests", { headers: authHeaders() })
@@ -25,15 +24,11 @@ function FriendsPage() {
     if (response.ok) setFriends(await response.json())
   }
 
-  async function loadDiscover() {
-    const response = await fetch("https://fast-connect-bay.vercel.app/friends/discover", { headers: authHeaders() })
-    if (response.ok) setDiscoverable(await response.json())
-  }
+
 
   useEffect(() => {
     loadRequests()
     loadFriends()
-    loadDiscover()
   }, [])
 
   async function handleAccept(requestId) {
@@ -54,19 +49,11 @@ function FriendsPage() {
     loadFriends()
   }
 
-  async function handleSendRequest(userId) {
-    await fetch(`https://fast-connect-bay.vercel.app/friends/requests/${userId}`, {
-      method: "POST",
-      headers: authHeaders(),
-    })
-    loadDiscover()
-    loadRequests()
-  }
+
 
   const tabs = [
     { key: "requests", label: `Requests (${requests.length})` },
     { key: "friends", label: `My Friends (${friends.length})` },
-    { key: "discover", label: "Discover" },
   ]
 
   return (
@@ -143,32 +130,6 @@ function FriendsPage() {
               </div>
               <button onClick={() => handleDecline(friend.request_id)} className="border rounded px-3 py-1 text-sm" style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}>
                 Remove
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {tab === "discover" && (
-        <div className="flex flex-col gap-3">
-          {discoverable.length === 0 && <p style={{ color: "var(--color-muted)" }}>No one new to discover right now.</p>}
-          {discoverable.map((person) => (
-            <div key={person.id} className="border rounded-lg p-4 flex items-center justify-between" style={{ borderColor: "var(--color-border)" }}>
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
-                  style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
-                >
-                  {initials(person.name)}
-                </div>
-                <p className="font-semibold">{person.name}</p>
-              </div>
-              <button
-                onClick={() => handleSendRequest(person.id)}
-                className="font-medium rounded px-3 py-1 text-sm"
-                style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
-              >
-                Add Friend
               </button>
             </div>
           ))}
