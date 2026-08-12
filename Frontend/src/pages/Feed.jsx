@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { initials } from "../utils/initials"
 import { getErrorMessage } from "../utils/errors"
@@ -274,15 +275,17 @@ function Feed() {
           posts.map((post) => (
             <div key={post.id} className="post-card border rounded-lg p-4" style={{ borderColor: "var(--color-border)" }}>
             <div className="flex items-center gap-3 mb-2">
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
-                style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
-              >
-                {initials(post.author_name)}
-              </div>
-              <div>
-                <p className="font-semibold">{post.author_name}</p>
-              </div>
+              <Link to={`/profile/${post.author_id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
+                  style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+                >
+                  {initials(post.author_name)}
+                </div>
+                <div>
+                  <p className="font-semibold">{post.author_name}</p>
+                </div>
+              </Link>
             </div>
 
             {editingId === post.id ? (
