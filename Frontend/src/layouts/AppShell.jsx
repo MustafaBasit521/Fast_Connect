@@ -7,11 +7,11 @@ import Particles from "../components/Particles"
 import Fireflies from "../components/Fireflies"
 
 const navItems = [
-  { to: "/feed", label: "Feed" },
-  { to: "/friends", label: "Friends" },
-  { to: "/messages", label: "Messages" },
-  { to: "/search", label: "Search" },
-  { to: "/profile", label: "Profile" },
+  { to: "/feed", label: "Feed", icon: "🏠" },
+  { to: "/friends", label: "Friends", icon: "👥" },
+  { to: "/messages", label: "Messages", icon: "💬" },
+  { to: "/search", label: "Search", icon: "🔍" },
+  { to: "/profile", label: "Profile", icon: "👤" },
 ]
 
 function AppShell() {
@@ -28,22 +28,22 @@ function AppShell() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="flex items-center justify-between px-6 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
         <div className="flex items-center gap-2">
           <div
-            className="w-8 h-8 rounded flex items-center justify-center font-bold text-sm"
+            className="w-8 h-8 rounded flex items-center justify-center font-bold text-sm shrink-0"
             style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
           >
             FC
           </div>
-          <span className="font-semibold">FAST Connect</span>
+          <span className="font-semibold hidden sm:inline">FAST Connect</span>
         </div>
 
-        <div className="flex items-center gap-3 relative">
+        <div className="flex items-center gap-2 sm:gap-3 relative">
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="w-9 h-9 rounded-full border flex items-center justify-center"
+            className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0"
             style={{ borderColor: "var(--color-border)" }}
           >
             {theme === "light" ? "🌙" : "☀️"}
@@ -51,7 +51,7 @@ function AppShell() {
 
           <button
             aria-label="Notifications"
-            className="w-9 h-9 rounded-full border flex items-center justify-center"
+            className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0"
             style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}
           >
             🔔
@@ -90,7 +90,7 @@ function AppShell() {
       </div>
 
       <div className="flex flex-1">
-        <div className="w-40 border-r flex flex-col gap-1 py-4 px-2" style={{ borderColor: "var(--color-border)" }}>
+        <div className="hidden md:flex w-40 shrink-0 border-r flex-col gap-1 py-4 px-2" style={{ borderColor: "var(--color-border)" }}>
           {navItems.map((item) => {
             const isActive = location.pathname === item.to
             return (
@@ -110,13 +110,33 @@ function AppShell() {
           })}
         </div>
 
-        <div className="flex-1 p-6 relative overflow-hidden">
+        <div className="flex-1 p-4 md:p-6 pb-20 md:pb-6 relative overflow-hidden overflow-x-hidden">
           {theme === "dark" ? <Fireflies count={18} /> : <Particles count={22} color="212, 168, 83" />}
 
           <div className="relative z-10">
             <Outlet />
           </div>
         </div>
+      </div>
+
+      <div
+        className="md:hidden fixed bottom-0 left-0 right-0 flex items-center justify-around border-t py-2 z-30"
+        style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}
+      >
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.to
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className="flex flex-col items-center gap-0.5 px-2 py-1 text-xs font-medium"
+              style={{ color: isActive ? "var(--color-primary)" : "var(--color-muted)" }}
+            >
+              <span className="text-lg leading-none">{item.icon}</span>
+              {item.label}
+            </Link>
+          )
+        })}
       </div>
     </div>
   )

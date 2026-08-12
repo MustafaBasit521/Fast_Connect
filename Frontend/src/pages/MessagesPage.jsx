@@ -53,7 +53,10 @@ function MessagesPage() {
 
   return (
     <div className="flex border rounded-lg" style={{ height: "70vh", borderColor: "var(--color-border)" }}>
-      <div className="w-64 border-r overflow-y-auto" style={{ borderColor: "var(--color-border)" }}>
+      <div
+        className={`w-full md:w-64 shrink-0 border-r overflow-y-auto ${selected ? "hidden md:block" : "block"}`}
+        style={{ borderColor: "var(--color-border)" }}
+      >
         <h1 className="text-lg font-bold p-4">Messages</h1>
 
         {friends.length === 0 && <p className="px-4" style={{ color: "var(--color-muted)" }}>Add friends to start messaging.</p>}
@@ -82,16 +85,26 @@ function MessagesPage() {
         ))}
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className={`flex-1 flex-col ${selected ? "flex" : "hidden md:flex"}`}>
         {selected ? (
           <>
-            <div className="p-4 border-b font-semibold" style={{ borderColor: "var(--color-border)" }}>{selected.name}</div>
+            <div className="p-4 border-b font-semibold flex items-center gap-2" style={{ borderColor: "var(--color-border)" }}>
+              <button
+                onClick={() => setSelected(null)}
+                aria-label="Back to conversations"
+                className="md:hidden -ml-1"
+                style={{ color: "var(--color-muted)" }}
+              >
+                ←
+              </button>
+              {selected.name}
+            </div>
 
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className="max-w-xs px-3 py-2 rounded-lg text-sm"
+                  className="max-w-[80%] sm:max-w-xs px-3 py-2 rounded-lg text-sm"
                   style={
                     msg.from_user_id === selected.id
                       ? { backgroundColor: "var(--color-border)", alignSelf: "flex-start" }

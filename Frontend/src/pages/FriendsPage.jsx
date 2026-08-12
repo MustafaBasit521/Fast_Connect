@@ -73,12 +73,12 @@ function FriendsPage() {
     <div className="max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Friends</h1>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className="px-4 py-2 rounded text-sm font-medium border"
+            className="px-4 py-2 rounded text-sm font-medium border shrink-0 whitespace-nowrap"
             style={
               tab === t.key
                 ? { backgroundColor: "var(--color-primary)", color: "var(--color-bg)", borderColor: "var(--color-primary)" }
