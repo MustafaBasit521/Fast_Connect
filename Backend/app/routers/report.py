@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.schemas.report import ReportCreate, ReportOut
+from app.schemas.report import ReportCreate, ReportOut, ReportResolve
 from app.schemas.user import UserOut
 from app.services import report_service
 from app.dependencies import get_current_user, get_current_admin
@@ -19,8 +19,8 @@ async def list_reports(admin: UserOut = Depends(get_current_admin)):
 
 
 @router.put("/{report_id}/resolve", response_model=ReportOut)
-async def resolve_report(report_id: str, admin: UserOut = Depends(get_current_admin)):
+async def resolve_report(report_id: str, data: ReportResolve, admin: UserOut = Depends(get_current_admin)):
     try:
-        return await report_service.resolve_report(report_id)
+        return await report_service.resolve_report(report_id, data.action)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

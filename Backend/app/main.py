@@ -22,7 +22,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://fast-connect-frontend-three.vercel.app",
+        "https://fast-connect-admin.vercel.app",  # placeholder — replace with your actual Admin Vercel domain once deployed
         "http://localhost:5173",
+        "http://localhost:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],

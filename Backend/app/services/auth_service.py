@@ -59,6 +59,22 @@ async def authenticate_user(credentials: UserLogin):
     if existing.get("status") == "restricted":
         raise ValueError("Your account has been restricted")
 
+    status = existing.get("status", "active")
+
+    if status == "temp_banned":
+        restricted_until = existing.get("restricted_until")
+        if restricted_until and restricted_until.tzinfo is not None:
+            restricted_until = restricted_until.astimezone(timezone.utc).replace(tzinfo=None)
+
+        if restricted_until and datetime.utcnow() < restricted_until:
+            raise ValueError(f"Your account is temporarily banned until {restricted_until.isoformat()} UTC")
+
+        await db["users"].update_one(
+            {"_id": existing["_id"]},
+            {"$set": {"status": "active"}, "$unset": {"restricted_until": ""}},
+        )
+        status = "active"
+
     return UserOut(
         id=str(existing["_id"]),
         name=existing["name"],
@@ -66,7 +82,7 @@ async def authenticate_user(credentials: UserLogin):
         bio=existing.get("bio"),
         phone=existing.get("phone"),
         role=existing.get("role", "user"),
-        status=existing.get("status", "active"),
+        status=status,
     )
 
 def create_access_token(data: dict) -> str:

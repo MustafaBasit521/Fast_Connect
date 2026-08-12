@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { initials } from "../utils/initials"
 import { getErrorMessage } from "../utils/errors"
+import ReportButton from "../components/ReportButton"
 import FlipClock from "../components/FlipClock"
 
 function authHeaders() {
@@ -12,7 +13,7 @@ function authHeaders() {
   }
 }
 
-function CommentSection({ postId }) {
+function CommentSection({ postId, currentUserId }) {
   const [comments, setComments] = useState([])
   const [content, setContent] = useState("")
 
@@ -46,10 +47,15 @@ function CommentSection({ postId }) {
   return (
     <div className="mt-3 ml-1 border-l-2 pl-3 flex flex-col gap-1" style={{ borderColor: "var(--color-border)" }}>
       {comments.map((comment) => (
-        <p key={comment.id} className="text-sm">
-          <span className="font-semibold">{comment.author_name}: </span>
-          {comment.content}
-        </p>
+        <div key={comment.id} className="flex items-start justify-between gap-2">
+          <p className="text-sm">
+            <span className="font-semibold">{comment.author_name}: </span>
+            {comment.content}
+          </p>
+          {comment.author_id !== currentUserId && (
+            <ReportButton targetType="comment" targetId={comment.id} className="shrink-0" />
+          )}
+        </div>
       ))}
 
       <form onSubmit={handleAddComment} className="flex gap-2 mt-1">
@@ -281,9 +287,13 @@ function Feed() {
                   <button onClick={() => handleDelete(post.id)} style={{ color: "var(--color-danger)" }}>Delete</button>
                 </>
               )}
+
+              {post.author_id !== user.id && (
+                <ReportButton targetType="post" targetId={post.id} />
+              )}
             </div>
 
-            <CommentSection postId={post.id} />
+            <CommentSection postId={post.id} currentUserId={user.id} />
           </div>
         ))}
       </div>

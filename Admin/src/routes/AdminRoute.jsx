@@ -9,8 +9,8 @@ function AdminRoute({ children }) {
     return <LoadingScreen />
   }
 
-  if (!user || user.role !== "admin") {
-    return <Navigate to="/feed" replace />
+  if (!user) {
+    return <Navigate to="/login" replace />
   }
 
   return children

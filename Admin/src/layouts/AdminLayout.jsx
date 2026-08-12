@@ -27,10 +27,12 @@ function AdminLayout() {
         </div>
 
         <span className="text-xs uppercase tracking-wide opacity-60 mb-2">Admin</span>
-        <Link to="/admin" className="py-2 px-3 rounded font-medium" style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}>
+        <Link to="/dashboard" className="py-2 px-3 rounded font-medium" style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}>
           Dashboard
         </Link>
-        <Link to="/feed" className="py-2 px-3 rounded opacity-80 mt-4">Back to app</Link>
+        <a href="https://fast-connect-frontend-three.vercel.app" className="py-2 px-3 rounded opacity-80 mt-4">
+          Visit user site
+        </a>
         <button onClick={handleLogout} className="py-2 px-3 rounded mt-auto text-left" style={{ color: "var(--color-danger)" }}>
           Log out
         </button>

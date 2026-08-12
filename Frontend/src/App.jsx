@@ -2,11 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider } from "./context/AuthContext"
 import { ThemeProvider } from "./context/ThemeContext"
 import ProtectedRoute from "./routes/ProtectedRoute"
-import AdminRoute from "./routes/AdminRoute"
 
 import AuthLayout from "./layouts/AuthLayout"
 import AppShell from "./layouts/AppShell"
-import AdminLayout from "./layouts/AdminLayout"
 
 import Login from "./pages/Login"
 import SignUp from "./pages/SignUp"
@@ -18,7 +16,6 @@ import MessagesPage from "./pages/MessagesPage"
 import MyProfile from "./pages/MyProfile"
 import SearchProfile from "./pages/SearchProfile"
 import ViewProfile from "./pages/ViewProfile"
-import AdminDashboard from "./pages/AdminDashboard"
 
 function App() {
   return (
@@ -46,18 +43,6 @@ function App() {
               <Route path="/profile" element={<MyProfile />} />
               <Route path="/search" element={<SearchProfile />} />
               <Route path="/profile/:userId" element={<ViewProfile />} />
-            </Route>
-
-            <Route
-              element={
-                <ProtectedRoute>
-                  <AdminRoute>
-                    <AdminLayout />
-                  </AdminRoute>
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/admin" element={<AdminDashboard />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/feed" replace />} />

@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -6,6 +8,8 @@ from app.schemas.user import UserOut
 from app.database.connection import db
 from app.services import post_service, comment_service, blog_service, profile_service
 from app.dependencies import get_current_admin
+
+TEMP_BAN_DAYS = 7
 
 router = APIRouter()
 
@@ -49,11 +53,49 @@ async def restrict_user(user_id: str, admin: UserOut = Depends(get_current_admin
     except InvalidId:
         raise HTTPException(status_code=404, detail="User not found")
 
-    result = await db["users"].update_one({"_id": object_id}, {"$set": {"status": "restricted"}})
+    result = await db["users"].update_one(
+        {"_id": object_id},
+        {"$set": {"status": "restricted"}, "$unset": {"restricted_until": ""}},
+    )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"message": "User restricted"}
+
+
+@router.put("/users/{user_id}/temp-ban")
+async def temp_ban_user(user_id: str, admin: UserOut = Depends(get_current_admin)):
+    try:
+        object_id = ObjectId(user_id)
+    except InvalidId:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    restricted_until = datetime.now(timezone.utc) + timedelta(days=TEMP_BAN_DAYS)
+    result = await db["users"].update_one(
+        {"_id": object_id},
+        {"$set": {"status": "temp_banned", "restricted_until": restricted_until}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"message": f"User temporarily banned for {TEMP_BAN_DAYS} days"}
+
+
+@router.put("/users/{user_id}/unrestrict")
+async def unrestrict_user(user_id: str, admin: UserOut = Depends(get_current_admin)):
+    try:
+        object_id = ObjectId(user_id)
+    except InvalidId:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    result = await db["users"].update_one(
+        {"_id": object_id},
+        {"$set": {"status": "active"}, "$unset": {"restricted_until": ""}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"message": "User restored to active"}
 
 
 @router.delete("/users/{user_id}")

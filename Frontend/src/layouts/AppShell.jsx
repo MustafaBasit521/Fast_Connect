@@ -40,10 +40,6 @@ function AppShell() {
         </div>
 
         <div className="flex items-center gap-3 relative">
-          {user?.role === "admin" && (
-            <Link to="/admin" className="text-sm font-medium" style={{ color: "var(--color-accent)" }}>Admin Dashboard</Link>
-          )}
-
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"

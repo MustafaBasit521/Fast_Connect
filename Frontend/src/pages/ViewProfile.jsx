@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { getErrorMessage } from "../utils/errors"
 import { initials } from "../utils/initials"
+import ReportButton from "../components/ReportButton"
 
 function authHeaders() {
   const token = localStorage.getItem("token")
@@ -53,6 +54,7 @@ function ViewProfile() {
         <div>
           <h1 className="text-xl font-bold">{profile.name}</h1>
           {profile.bio && <p style={{ color: "var(--color-muted)" }}>{profile.bio}</p>}
+          <ReportButton targetType="user" targetId={profile.id} className="mt-2" />
         </div>
       </div>
     </div>

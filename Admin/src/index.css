@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #2d3a5c;
+  --color-bg: #faf8f5;
+  --color-accent: #d4a853;
+  --color-coral: #e07a5f;
+  --color-text: #44403c;
+  --color-surface: #ffffff;
+  --color-border: #e5e1da;
+  --color-muted: #78716c;
+  --color-danger: #dc2626;
+  --color-panel: #2d3a5c;
+  --color-panel-text: #ffffff;
+}
+
+[data-theme="dark"] {
+  --color-primary: #d4a853;
+  --color-bg: #0f1421;
+  --color-accent: #d4a853;
+  --color-coral: #e07a5f;
+  --color-text: #f3f4f6;
+  --color-surface: #161d2e;
+  --color-border: #232b3d;
+  --color-muted: #9ca3af;
+  --color-danger: #dc2626;
+  --color-panel: #161d2e;
+  --color-panel-text: #f3f4f6;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+input,
+textarea {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.loader-overlay {
+  position: fixed; inset: 0;
+  background: var(--color-bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.pulse-box {
+  width: 64px; height: 64px;
+  position: relative;
+}
+.pulse-logo {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: var(--color-panel);
+  color: var(--color-accent);
+  display: flex; align-items: center;
+  justify-content: center;
+  font-weight: 700; font-size: 20px;
+  position: relative; z-index: 2;
+}
+.pulse-ring-1, .pulse-ring-2 {
+  position: absolute; inset: -8px;
+  border-radius: 24px;
+  border: 2px solid var(--color-accent);
+  animation: pulseOut 2s ease-out infinite;
+}
+.pulse-ring-2 { animation-delay: 0.5s; }
+.pulse-tagline {
+  margin-top: 24px;
+  font-size: 13px; letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+@keyframes pulseOut {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
