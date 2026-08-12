@@ -4,6 +4,8 @@ import { initials } from "../utils/initials"
 import { getErrorMessage } from "../utils/errors"
 import ReportButton from "../components/ReportButton"
 import FlipClock from "../components/FlipClock"
+import { PostSkeleton } from "../components/Skeleton"
+import { EmptyState } from "../components/EmptyState"
 
 function authHeaders() {
   const token = localStorage.getItem("token")
@@ -76,6 +78,7 @@ function Feed() {
   const [message, setMessage] = useState("")
   const [editingId, setEditingId] = useState(null)
   const [editContent, setEditContent] = useState("")
+  const [loading, setLoading] = useState(true)
 
   function handleImageSelect(e) {
     const file = e.target.files[0]
@@ -86,6 +89,7 @@ function Feed() {
   }
 
   async function loadFeed() {
+    setLoading(true)
     const response = await fetch("https://fast-connect-bay.vercel.app/posts", {
       headers: authHeaders(),
     })
@@ -96,6 +100,7 @@ function Feed() {
     } else {
       setMessage(getErrorMessage(data))
     }
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -235,8 +240,21 @@ function Feed() {
       {message && <p className="text-sm mb-2" style={{ color: "var(--color-danger)" }}>{message}</p>}
 
       <div className="flex flex-col gap-4">
-        {posts.map((post) => (
-          <div key={post.id} className="post-card border rounded-lg p-4" style={{ borderColor: "var(--color-border)" }}>
+        {loading ? (
+          <>
+            <PostSkeleton />
+            <PostSkeleton />
+            <PostSkeleton />
+          </>
+        ) : posts.length === 0 ? (
+          <EmptyState 
+            icon="📭" 
+            title="No posts yet" 
+            message="Be the first to share something with your campus!" 
+          />
+        ) : (
+          posts.map((post) => (
+            <div key={post.id} className="post-card border rounded-lg p-4" style={{ borderColor: "var(--color-border)" }}>
             <div className="flex items-center gap-3 mb-2">
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
@@ -295,7 +313,7 @@ function Feed() {
 
             <CommentSection postId={post.id} currentUserId={user.id} />
           </div>
-        ))}
+        )))}
       </div>
       </div>
 
