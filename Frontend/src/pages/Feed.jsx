@@ -6,6 +6,7 @@ import ReportButton from "../components/ReportButton"
 import FlipClock from "../components/FlipClock"
 import { PostSkeleton } from "../components/Skeleton"
 import { EmptyState } from "../components/EmptyState"
+import { useToast } from "../context/ToastContext"
 
 function authHeaders() {
   const token = localStorage.getItem("token")
@@ -75,7 +76,7 @@ function Feed() {
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const [uploading, setUploading] = useState(false)
-  const [message, setMessage] = useState("")
+  const { addToast } = useToast()
   const [editingId, setEditingId] = useState(null)
   const [editContent, setEditContent] = useState("")
   const [loading, setLoading] = useState(true)
@@ -88,6 +89,12 @@ function Feed() {
     setImagePreview(URL.createObjectURL(file))
   }
 
+  function handleCancelCreate() {
+    setContent("")
+    setImageFile(null)
+    setImagePreview(null)
+  }
+
   async function loadFeed() {
     setLoading(true)
     const response = await fetch("https://fast-connect-bay.vercel.app/posts", {
@@ -98,7 +105,7 @@ function Feed() {
     if (response.ok) {
       setPosts(data)
     } else {
-      setMessage(getErrorMessage(data))
+      addToast(getErrorMessage(data), "error")
     }
     setLoading(false)
   }
@@ -129,7 +136,7 @@ function Feed() {
       setUploading(false)
 
       if (!uploadResponse.ok) {
-        setMessage(getErrorMessage(uploadData))
+        addToast(getErrorMessage(uploadData), "error")
         return
       }
 
@@ -147,9 +154,10 @@ function Feed() {
       setContent("")
       setImageFile(null)
       setImagePreview(null)
+      addToast("Post created successfully!", "success")
       loadFeed()
     } else {
-      setMessage(getErrorMessage(data))
+      addToast(getErrorMessage(data), "error")
     }
   }
 
@@ -225,19 +233,29 @@ function Feed() {
               <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
             </label>
 
-            <button
-              type="submit"
-              disabled={uploading}
-              className="rounded px-4 py-2 disabled:opacity-50"
-              style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
-            >
-              {uploading ? "Uploading..." : "Post"}
-            </button>
+            <div className="flex items-center gap-2">
+              {(content.trim() || imageFile) && (
+                <button
+                  type="button"
+                  onClick={handleCancelCreate}
+                  className="rounded px-3 py-2 text-sm hover:bg-gray-800 transition-colors"
+                  style={{ color: "var(--color-muted)" }}
+                >
+                  Cancel
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={uploading || (!content.trim() && !imageFile)}
+                className="rounded px-4 py-2 disabled:opacity-50 font-medium"
+                style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+              >
+                {uploading ? "Uploading..." : "Post"}
+              </button>
+            </div>
           </div>
         </form>
       </div>
-
-      {message && <p className="text-sm mb-2" style={{ color: "var(--color-danger)" }}>{message}</p>}
 
       <div className="flex flex-col gap-4">
         {loading ? (
