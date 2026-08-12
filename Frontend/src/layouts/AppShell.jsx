@@ -20,6 +20,7 @@ function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   function handleLogout() {
     logout()
@@ -30,6 +31,14 @@ function AppShell() {
     <div className="min-h-screen flex flex-col">
       <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
         <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+            className="hidden md:flex w-8 h-8 items-center justify-center rounded hover:opacity-70 text-lg transition-transform duration-200" 
+            style={{ color: "var(--color-muted)", transform: isSidebarOpen ? "rotate(0deg)" : "rotate(180deg)" }}
+            aria-label="Toggle Sidebar"
+          >
+            ☰
+          </button>
           <div
             className="w-8 h-8 rounded flex items-center justify-center font-bold text-sm shrink-0"
             style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
@@ -89,22 +98,27 @@ function AppShell() {
         </div>
       </div>
 
-      <div className="flex flex-1">
-        <div className="hidden md:flex w-40 shrink-0 border-r flex-col gap-1 py-4 px-2" style={{ borderColor: "var(--color-border)" }}>
+      <div className="flex flex-1 overflow-hidden">
+        <div 
+          className={`hidden md:flex shrink-0 border-r flex-col gap-2 py-4 px-2 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-48' : 'w-[4.5rem] items-center'}`} 
+          style={{ borderColor: "var(--color-border)" }}
+        >
           {navItems.map((item) => {
             const isActive = location.pathname === item.to
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className="text-sm px-3 py-2 rounded font-medium"
+                className={`text-sm py-2 rounded font-medium flex items-center transition-all duration-200 ${isSidebarOpen ? 'px-3 gap-3 w-full' : 'justify-center w-10 h-10 px-0'}`}
                 style={
                   isActive
                     ? { backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }
                     : { color: "var(--color-muted)" }
                 }
+                title={!isSidebarOpen ? item.label : ""}
               >
-                {item.label}
+                <span className="text-lg leading-none">{item.icon}</span>
+                {isSidebarOpen && <span className="whitespace-nowrap overflow-hidden">{item.label}</span>}
               </Link>
             )
           })}
