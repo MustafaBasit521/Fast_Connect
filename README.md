@@ -14,6 +14,7 @@ A full-stack social network built for the FAST-NUCES university community — pr
 - **Blogs** — long-form posts separate from the feed
 - **Reports & Feedback** — users can report a post, comment, or profile; the report captures a server-side snapshot ("proof") of the reported content so it can be reviewed even if later edited or deleted
 - **Admin portal** — a fully separate app/deployment (own domain) for moderation: view stats, manage users, and resolve reports by dismissing, restricting, or temporarily banning (7 days, auto-expires) the offending account
+- **FAST AI** — an AI companion (Google Gemini) pinned as a special contact in Messages, for casual chat, study help, or when your friends are offline; conversation history persists per user
 
 ## Tech Stack
 
@@ -23,6 +24,7 @@ A full-stack social network built for the FAST-NUCES university community — pr
 - JWT auth (`PyJWT`) + `bcrypt` password hashing
 - Cloudinary for image uploads
 - SMTP email (password reset, friend request/message notifications)
+- Google Gemini API (free tier) for the FAST AI companion
 
 **Frontend**
 - React 19 + Vite
@@ -40,7 +42,7 @@ A full-stack social network built for the FAST-NUCES university community — pr
 Fast_Connect/
 ├── Backend/
 │   └── app/
-│       ├── routers/        # API route handlers (auth, profile, post, friend, message, blog, report, feedback, admin, upload)
+│       ├── routers/        # API route handlers (auth, profile, post, friend, message, blog, report, feedback, admin, upload, chatbot)
 │       ├── schemas/        # Pydantic request/response models
 │       ├── services/       # Business logic per feature
 │       ├── database/       # MongoDB connection
@@ -86,14 +88,18 @@ JWT_ALGORITHM=HS256
 MAIL_ENABLED=false          # set true once SMTP is configured
 SMTP_HOST=
 SMTP_PORT=
-SMTP_USERNAME=
-SMTP_PASSWORD=
+SMTP_USER=
+SMTP_PASS=
 MAIL_FROM=
 
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
+
+GEMINI_API_KEY=              # powers the FAST AI companion (Google Gemini, free tier) — get one at aistudio.google.com/apikey
 ```
+
+Without `GEMINI_API_KEY` set, `/chatbot/chat` returns a clear 503 rather than crashing — every other feature keeps working.
 
 Run the API:
 

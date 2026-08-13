@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { initials } from "../utils/initials"
+import ChatbotPane from "../components/ChatbotPane"
+
+const AI_CONTACT = { id: "fast-ai", name: "FAST AI", request_id: "fast-ai", isAI: true }
 
 function authHeaders() {
   const token = localStorage.getItem("token")
@@ -31,18 +34,21 @@ function MessagesPage() {
           // unless a message actually gets sent (which makes them a real friend/follow).
           const existing = data.find((f) => f.id === target.userId)
           if (existing) {
-            setFriends(data)
+            setFriends([AI_CONTACT, ...data])
             setSelected(existing)
           } else {
             const ephemeral = { id: target.userId, name: target.userName, request_id: `ephemeral-${target.userId}`, deleted: false }
-            setFriends([ephemeral, ...data])
+            setFriends([AI_CONTACT, ephemeral, ...data])
             setSelected(ephemeral)
           }
           navigate(location.pathname, { replace: true, state: null })
         } else {
-          setFriends(data)
-          if (data.length > 0) setSelected(data[0])
+          setFriends([AI_CONTACT, ...data])
+          setSelected(AI_CONTACT)
         }
+      } else {
+        setFriends([AI_CONTACT])
+        setSelected(AI_CONTACT)
       }
     }
 
@@ -55,7 +61,7 @@ function MessagesPage() {
   }
 
   useEffect(() => {
-    if (selected) loadMessages(selected.id)
+    if (selected && !selected.isAI) loadMessages(selected.id)
   }, [selected])
 
   async function handleSend(e) {
@@ -92,12 +98,14 @@ function MessagesPage() {
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
               style={
-                friend.deleted
+                friend.isAI
+                  ? { backgroundColor: "var(--color-accent)" }
+                  : friend.deleted
                   ? { backgroundColor: "var(--color-border)", color: "var(--color-muted)" }
                   : { backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }
               }
             >
-              {friend.deleted ? "?" : initials(friend.name)}
+              {friend.isAI ? "🤖" : friend.deleted ? "?" : initials(friend.name)}
             </div>
             <p className={friend.deleted ? "text-sm italic" : "font-medium text-sm"} style={friend.deleted ? { color: "var(--color-muted)" } : undefined}>
               {friend.name}
@@ -107,7 +115,9 @@ function MessagesPage() {
       </div>
 
       <div className={`flex-1 flex-col ${selected ? "flex" : "hidden md:flex"}`}>
-        {selected ? (
+        {selected?.isAI ? (
+          <ChatbotPane onBack={() => setSelected(null)} />
+        ) : selected ? (
           <>
             <div className="p-4 border-b font-semibold flex items-center gap-2" style={{ borderColor: "var(--color-border)" }}>
               <button

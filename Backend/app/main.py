@@ -16,6 +16,8 @@ from app.routers.report import router as report_router
 from app.routers.feedback import router as feedback_router
 from app.routers.admin import router as admin_router
 from app.routers.upload import router as upload_router
+from app.routers.chatbot import router as chatbot_router
+from app.services.chatbot_service import ensure_indexes as ensure_chatbot_indexes
 
 
 app.add_middleware(
@@ -42,6 +44,12 @@ app.include_router(report_router, prefix="/reports", tags=["reports"])
 app.include_router(feedback_router, prefix="/feedback", tags=["feedback"])
 app.include_router(admin_router, prefix="/admin", tags=["admin"])
 app.include_router(upload_router, prefix="/uploads", tags=["uploads"])
+app.include_router(chatbot_router, prefix="/chatbot", tags=["chatbot"])
+
+
+@app.on_event("startup")
+async def on_startup():
+    await ensure_chatbot_indexes()
 
 
 @app.get("/")
