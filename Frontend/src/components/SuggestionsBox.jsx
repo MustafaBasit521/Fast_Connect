@@ -39,9 +39,10 @@ export function SuggestionsBox() {
       method: "POST",
       headers: authHeaders(),
     });
-    
+    const data = await response.json();
+
     if (response.ok) {
-      addToast("Friend request sent!", "success");
+      addToast(data.status === "accepted" ? "Now following!" : "Follow request sent!", "success");
       // Remove the person from suggestions
       setSuggestions(prev => prev.filter(p => p.id !== userId));
     } else {

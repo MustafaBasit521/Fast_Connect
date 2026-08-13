@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 from datetime import datetime
 
 
@@ -17,3 +18,8 @@ class FriendOut(BaseModel):
     id: str
     name: str
     deleted: bool = False
+
+
+class RelationshipStatus(BaseModel):
+    status: str
+    request_id: Optional[str] = None

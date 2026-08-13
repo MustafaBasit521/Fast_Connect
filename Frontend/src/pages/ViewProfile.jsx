@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { getErrorMessage } from "../utils/errors"
 import { initials } from "../utils/initials"
+import { useAuth } from "../context/AuthContext"
+import { useToast } from "../context/ToastContext"
 import ReportButton from "../components/ReportButton"
 import { PostSkeleton } from "../components/Skeleton"
 import { EmptyState } from "../components/EmptyState"
+
+const API = "https://fast-connect-bay.vercel.app"
 
 function authHeaders() {
   const token = localStorage.getItem("token")
@@ -13,17 +17,20 @@ function authHeaders() {
 
 function ViewProfile() {
   const { userId } = useParams()
+  const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
+  const { addToast } = useToast()
 
   const [profile, setProfile] = useState(null)
   const [message, setMessage] = useState("")
   const [posts, setPosts] = useState([])
   const [loadingPosts, setLoadingPosts] = useState(true)
-  const [isFriend, setIsFriend] = useState(false)
-  const [checkingFriendship, setCheckingFriendship] = useState(true)
+  const [relationship, setRelationship] = useState({ status: "none", request_id: null })
+  const [checkingRelationship, setCheckingRelationship] = useState(true)
 
   useEffect(() => {
     async function loadProfile() {
-      const response = await fetch(`https://fast-connect-bay.vercel.app/profile/${userId}`, {
+      const response = await fetch(`${API}/profile/${userId}`, {
         headers: authHeaders(),
       })
       const data = await response.json()
@@ -31,16 +38,12 @@ function ViewProfile() {
       if (response.ok) {
         setProfile(data)
         setMessage("")
-        
-        // Check friendship status
-        const friendsRes = await fetch("https://fast-connect-bay.vercel.app/friends", { headers: authHeaders() })
-        if (friendsRes.ok) {
-           const friendsList = await friendsRes.json()
-           // Assuming the backend returns name, we match by name or id.
-           const isF = friendsList.some(f => f.name === data.name || f.id === data.id)
-           setIsFriend(isF)
+
+        const statusRes = await fetch(`${API}/friends/status/${userId}`, { headers: authHeaders() })
+        if (statusRes.ok) {
+          setRelationship(await statusRes.json())
         }
-        setCheckingFriendship(false)
+        setCheckingRelationship(false)
       } else {
         setProfile(null)
         setMessage(getErrorMessage(data))
@@ -49,7 +52,7 @@ function ViewProfile() {
 
     async function loadUserPosts() {
       setLoadingPosts(true)
-      const response = await fetch("https://fast-connect-bay.vercel.app/posts", {
+      const response = await fetch(`${API}/posts`, {
         headers: authHeaders(),
       })
       const data = await response.json()
@@ -65,6 +68,67 @@ function ViewProfile() {
     loadUserPosts()
   }, [userId])
 
+  async function handleFollowClick() {
+    if (relationship.status === "none") {
+      const response = await fetch(`${API}/friends/requests/${profile.id}`, {
+        method: "POST",
+        headers: authHeaders(),
+      })
+      const data = await response.json()
+
+      if (response.ok) {
+        setRelationship({ status: data.status, request_id: data.id })
+        addToast(
+          data.status === "accepted" ? `You are now following ${profile.name}` : "Follow request sent",
+          "success"
+        )
+      } else {
+        addToast(getErrorMessage(data), "error")
+      }
+      return
+    }
+
+    if (relationship.status === "pending_incoming") {
+      const response = await fetch(`${API}/friends/requests/${relationship.request_id}/accept`, {
+        method: "PUT",
+        headers: authHeaders(),
+      })
+
+      if (response.ok) {
+        setRelationship({ status: "accepted", request_id: relationship.request_id })
+        addToast(`You are now following each other`, "success")
+      } else {
+        addToast("Could not accept request.", "error")
+      }
+      return
+    }
+
+    // pending_outgoing (cancel request) or accepted (unfollow) both just remove the relationship
+    const response = await fetch(`${API}/friends/requests/${relationship.request_id}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    })
+
+    if (response.ok) {
+      const wasFollowing = relationship.status === "accepted"
+      setRelationship({ status: "none", request_id: null })
+      addToast(wasFollowing ? `Unfollowed ${profile.name}` : "Follow request cancelled", "info")
+    } else {
+      addToast("Something went wrong.", "error")
+    }
+  }
+
+  function handleMessageClick() {
+    navigate("/messages", { state: { userId: profile.id, userName: profile.name } })
+  }
+
+  function followLabel() {
+    if (relationship.status === "accepted") return "Followed"
+    if (relationship.status === "pending_outgoing") return "Requested"
+    if (relationship.status === "pending_incoming") return "Follow Back"
+    return "Follow"
+  }
+
   if (message) {
     return <p style={{ color: "var(--color-danger)" }}>{message}</p>
   }
@@ -72,6 +136,9 @@ function ViewProfile() {
   if (!profile) {
     return null
   }
+
+  const isOwnProfile = currentUser?.id === profile.id
+  const canSeePosts = !profile.is_private || relationship.status === "accepted" || isOwnProfile
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-8">
@@ -91,27 +158,42 @@ function ViewProfile() {
             <p className="mb-6 text-sm italic opacity-70" style={{ color: "var(--color-muted)" }}>No bio provided.</p>
           )}
           
-          <div className="flex justify-center sm:justify-start gap-3 mt-auto">
-             <button className="px-6 py-2 rounded-lg font-bold text-sm transition-transform hover:scale-105" style={{ backgroundColor: isFriend ? "var(--color-surface)" : "var(--color-primary)", color: isFriend ? "var(--color-text)" : "var(--color-bg)", border: isFriend ? "1px solid var(--color-border)" : "none" }}>
-               {isFriend ? "Followed" : "Follow"}
-             </button>
-             <button className="px-6 py-2 rounded-lg font-bold text-sm transition-transform hover:scale-105 border" style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}>
-               Message
-             </button>
-             <ReportButton targetType="user" targetId={profile.id} />
-          </div>
+          {!isOwnProfile && (
+            <div className="flex justify-center sm:justify-start gap-3 mt-auto">
+               <button
+                 onClick={handleFollowClick}
+                 disabled={checkingRelationship}
+                 className="px-6 py-2 rounded-lg font-bold text-sm transition-transform hover:scale-105 disabled:opacity-50"
+                 style={
+                   relationship.status === "accepted"
+                     ? { backgroundColor: "var(--color-surface)", color: "var(--color-text)", border: "1px solid var(--color-border)" }
+                     : { backgroundColor: "var(--color-primary)", color: "var(--color-bg)", border: "none" }
+                 }
+               >
+                 {followLabel()}
+               </button>
+               <button
+                 onClick={handleMessageClick}
+                 className="px-6 py-2 rounded-lg font-bold text-sm transition-transform hover:scale-105 border"
+                 style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+               >
+                 Message
+               </button>
+               <ReportButton targetType="user" targetId={profile.id} />
+            </div>
+          )}
         </div>
       </div>
-      
+
       {/* User Posts Section */}
       <div className="mt-4">
         <h2 className="text-xl font-bold mb-6 border-b pb-3" style={{ borderColor: "var(--color-border)" }}>Posts</h2>
-        
-        {!checkingFriendship && !isFriend ? (
-          <EmptyState 
-            icon="🔒" 
-            title="This account is private" 
-            message="Follow this account to see their photos and videos." 
+
+        {!checkingRelationship && !canSeePosts ? (
+          <EmptyState
+            icon="🔒"
+            title="This account is private"
+            message="Follow this account to see their photos and videos."
           />
         ) : (
           <div className="flex flex-col gap-6">

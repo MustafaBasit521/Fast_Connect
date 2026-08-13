@@ -11,6 +11,7 @@ function MyProfile() {
   const [name, setName] = useState("")
   const [bio, setBio] = useState("")
   const [phone, setPhone] = useState("")
+  const [isPrivate, setIsPrivate] = useState(false)
   const [profileMessage, setProfileMessage] = useState("")
 
   const [oldPassword, setOldPassword] = useState("")
@@ -25,6 +26,7 @@ function MyProfile() {
       setName(user.name)
       setBio(user.bio || "")
       setPhone(user.phone || "")
+      setIsPrivate(user.is_private || false)
     }
   }, [user])
 
@@ -39,7 +41,7 @@ function MyProfile() {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`,
       },
-      body: JSON.stringify({ name, bio, phone }),
+      body: JSON.stringify({ name, bio, phone, is_private: isPrivate }),
     })
 
     const data = await response.json()
@@ -126,6 +128,21 @@ function MyProfile() {
             <label className="block text-sm font-medium mb-1">Phone</label>
             <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full border rounded px-3 py-2" style={{ borderColor: "var(--color-border)" }} />
           </div>
+
+          <label className="flex items-center justify-between gap-4 border rounded px-3 py-2 cursor-pointer" style={{ borderColor: "var(--color-border)" }}>
+            <div>
+              <p className="text-sm font-medium">Private account</p>
+              <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+                {isPrivate ? "Follow requests need your approval." : "Anyone can follow you instantly."}
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              checked={isPrivate}
+              onChange={(e) => setIsPrivate(e.target.checked)}
+              className="w-5 h-5 shrink-0"
+            />
+          </label>
 
           <button type="submit" className="rounded px-4 py-2 self-start" style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}>
             Save Changes

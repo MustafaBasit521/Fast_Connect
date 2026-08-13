@@ -14,6 +14,7 @@ def _to_user_out(user: dict) -> UserOut:
         phone=user.get("phone"),
         role=user.get("role", "user"),
         status=user.get("status", "active"),
+        is_private=user.get("is_private", False),
     )
 
 

@@ -12,6 +12,7 @@ class UserOut(BaseModel):
     phone: Optional[str] = None
     role: str = "user"
     status: str = "active"
+    is_private: bool = False
 
 class UserSignUp(BaseModel):
     name:str=Field(...,min_length=3,description='Enter your name')
@@ -46,6 +47,7 @@ class ProfileUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=3)
     bio: Optional[str] = None
     phone: Optional[str] = None
+    is_private: Optional[bool] = None
 
 
 

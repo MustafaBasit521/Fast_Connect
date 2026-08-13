@@ -5,9 +5,9 @@ from bson import ObjectId
 from bson.errors import InvalidId
 
 from app.database.connection import db
-from app.schemas.friend import FriendRequestOut, FriendOut
+from app.schemas.friend import FriendRequestOut, FriendOut, RelationshipStatus
 from app.schemas.user import UserOut
-from app.services.email import send_friend_request_email
+from app.services.email import send_friend_request_email, send_new_follower_email
 
 
 def _to_request_out(req: dict) -> FriendRequestOut:
@@ -44,19 +44,25 @@ async def send_request(from_id: str, from_name: str, to_id: str) -> FriendReques
     if existing:
         raise ValueError("A friend request already exists between you and this user")
 
+    is_private = to_user.get("is_private", False)
+    status = "pending" if is_private else "accepted"
+
     request_data = {
         "from_user_id": from_id,
         "from_user_name": from_name,
         "to_user_id": to_id,
         "to_user_name": to_user["name"],
-        "status": "pending",
+        "status": status,
         "created_at": datetime.now(timezone.utc),
     }
 
     result = await db["friend_requests"].insert_one(request_data)
     request_data["_id"] = result.inserted_id
 
-    asyncio.create_task(asyncio.to_thread(send_friend_request_email, to_user["email"], to_user["name"], from_name))
+    if is_private:
+        asyncio.create_task(asyncio.to_thread(send_friend_request_email, to_user["email"], to_user["name"], from_name))
+    else:
+        asyncio.create_task(asyncio.to_thread(send_new_follower_email, to_user["email"], to_user["name"], from_name))
 
     return _to_request_out(request_data)
 
@@ -137,6 +143,26 @@ async def list_pending_requests(current_user_id: str) -> list[FriendRequestOut]:
     return requests
 
 
+async def get_relationship_status(current_user_id: str, other_user_id: str) -> RelationshipStatus:
+    request = await db["friend_requests"].find_one({
+        "$or": [
+            {"from_user_id": current_user_id, "to_user_id": other_user_id},
+            {"from_user_id": other_user_id, "to_user_id": current_user_id},
+        ]
+    })
+
+    if request is None:
+        return RelationshipStatus(status="none")
+
+    if request["status"] == "accepted":
+        return RelationshipStatus(status="accepted", request_id=str(request["_id"]))
+
+    if request["from_user_id"] == current_user_id:
+        return RelationshipStatus(status="pending_outgoing", request_id=str(request["_id"]))
+
+    return RelationshipStatus(status="pending_incoming", request_id=str(request["_id"]))
+
+
 async def discover_users(current_user_id: str) -> list[UserOut]:
     cursor = db["friend_requests"].find({
         "$or": [{"from_user_id": current_user_id}, {"to_user_id": current_user_id}],
@@ -161,6 +187,7 @@ async def discover_users(current_user_id: str) -> list[UserOut]:
             phone=user.get("phone"),
             role=user.get("role", "user"),
             status=user.get("status", "active"),
+            is_private=user.get("is_private", False),
         ))
 
     return users

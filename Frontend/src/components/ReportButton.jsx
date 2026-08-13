@@ -9,16 +9,26 @@ function authHeaders() {
   }
 }
 
+const REASONS = ["Spam", "Harassment or bullying", "Hate speech", "Inappropriate content", "Other"]
+
 function ReportButton({ targetType, targetId, className = "" }) {
   const [open, setOpen] = useState(false)
-  const [reason, setReason] = useState("")
+  const [selectedReason, setSelectedReason] = useState("")
+  const [details, setDetails] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState("")
 
+  function closeModal() {
+    setOpen(false)
+    setError("")
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!reason.trim()) return
+    if (!selectedReason) return
+
+    const reason = details.trim() ? `${selectedReason} — ${details.trim()}` : selectedReason
 
     setSubmitting(true)
     setError("")
@@ -41,11 +51,11 @@ function ReportButton({ targetType, targetId, className = "" }) {
   }
 
   if (done) {
-    return <span className={`text-xs ${className}`} style={{ color: "var(--color-muted)" }}>Reported</span>
+    return <span className={`text-xs ${className}`} style={{ color: "var(--color-muted)" }}>✓ Reported</span>
   }
 
-  if (!open) {
-    return (
+  return (
+    <>
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -54,29 +64,72 @@ function ReportButton({ targetType, targetId, className = "" }) {
       >
         Report
       </button>
-    )
-  }
 
-  return (
-    <form onSubmit={handleSubmit} className={`flex flex-col gap-1 mt-1 ${className}`}>
-      <div className="flex gap-2">
-        <input
-          autoFocus
-          placeholder="Why are you reporting this?"
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          className="border rounded px-2 py-1 text-xs flex-1"
-          style={{ borderColor: "var(--color-border)" }}
-        />
-        <button type="submit" disabled={submitting} className="text-xs font-medium disabled:opacity-50" style={{ color: "var(--color-danger)" }}>
-          Submit
-        </button>
-        <button type="button" onClick={() => setOpen(false)} className="text-xs" style={{ color: "var(--color-muted)" }}>
-          Cancel
-        </button>
-      </div>
-      {error && <p className="text-xs" style={{ color: "var(--color-danger)" }}>{error}</p>}
-    </form>
+      {open && (
+        <div className="report-backdrop" onClick={closeModal}>
+          <div className="report-glass-card" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg" style={{ color: "#fff" }}>Report {targetType}</h3>
+              <button
+                type="button"
+                onClick={closeModal}
+                aria-label="Close"
+                className="text-xl leading-none"
+                style={{ color: "rgba(255,255,255,0.6)" }}
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>Why are you reporting this?</p>
+
+              <div className="flex flex-wrap gap-2">
+                {REASONS.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setSelectedReason(r)}
+                    className={`report-chip ${selectedReason === r ? "active" : ""}`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                rows={3}
+                placeholder="Add details (optional)..."
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+                className="report-glass-input"
+              />
+
+              {error && <p className="text-xs" style={{ color: "#fca5a5" }}>{error}</p>}
+
+              <div className="flex justify-end gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="text-sm px-4 py-2 rounded-lg"
+                  style={{ color: "rgba(255,255,255,0.7)" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting || !selectedReason}
+                  className="text-sm font-semibold px-4 py-2 rounded-lg disabled:opacity-40"
+                  style={{ backgroundColor: "#ef4444", color: "#fff" }}
+                >
+                  {submitting ? "Submitting..." : "Submit report"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

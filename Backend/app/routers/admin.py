@@ -41,6 +41,7 @@ async def list_users(admin: UserOut = Depends(get_current_admin)):
             phone=user.get("phone"),
             role=user.get("role", "user"),
             status=user.get("status", "active"),
+            is_private=user.get("is_private", False),
         ))
 
     return users

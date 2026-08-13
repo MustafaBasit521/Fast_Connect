@@ -64,6 +64,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         phone=user.get("phone"),
         role=user.get("role", "user"),
         status=user.get("status", "active"),
+        is_private=user.get("is_private", False),
     )
 
 

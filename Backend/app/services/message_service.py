@@ -19,23 +19,9 @@ def _to_message_out(msg: dict) -> MessageOut:
     )
 
 
-async def _are_friends(user_a: str, user_b: str) -> bool:
-    existing = await db["friend_requests"].find_one({
-        "status": "accepted",
-        "$or": [
-            {"from_user_id": user_a, "to_user_id": user_b},
-            {"from_user_id": user_b, "to_user_id": user_a},
-        ],
-    })
-    return existing is not None
-
-
 async def send_message(from_id: str, from_name: str, to_id: str, data: MessageCreate) -> MessageOut:
     if from_id == to_id:
         raise ValueError("You cannot message yourself")
-
-    if not await _are_friends(from_id, to_id):
-        raise PermissionError("You can only message your friends")
 
     try:
         to_user = await db["users"].find_one({"_id": ObjectId(to_id)})

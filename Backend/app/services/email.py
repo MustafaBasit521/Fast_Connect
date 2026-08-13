@@ -63,6 +63,15 @@ def send_friend_request_email(to_email: str, to_name: str, from_name: str):
     )
 
 
+def send_new_follower_email(to_email: str, to_name: str, from_name: str):
+    send_email(
+        to=to_email,
+        subject=f"{from_name} started following you",
+        text=f"Hi {to_name}, {from_name} started following you on FAST Connect.",
+        html=f"<p>Hi <strong>{to_name}</strong>, <strong>{from_name}</strong> started following you on FAST Connect.</p>",
+    )
+
+
 def send_new_message_email(to_email: str, to_name: str, from_name: str):
     send_email(
         to=to_email,

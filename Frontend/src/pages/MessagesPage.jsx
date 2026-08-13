@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
 import { initials } from "../utils/initials"
 
 function authHeaders() {
@@ -10,6 +11,8 @@ function authHeaders() {
 }
 
 function MessagesPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [friends, setFriends] = useState([])
   const [selected, setSelected] = useState(null)
   const [messages, setMessages] = useState([])
@@ -20,8 +23,26 @@ function MessagesPage() {
       const response = await fetch("https://fast-connect-bay.vercel.app/friends", { headers: authHeaders() })
       if (response.ok) {
         const data = await response.json()
-        setFriends(data)
-        if (data.length > 0) setSelected(data[0])
+
+        const target = location.state
+        if (target?.userId) {
+          // Came from a profile's "Message" button — this thread only exists for this
+          // visit and is never persisted, so it won't reappear on the next page load
+          // unless a message actually gets sent (which makes them a real friend/follow).
+          const existing = data.find((f) => f.id === target.userId)
+          if (existing) {
+            setFriends(data)
+            setSelected(existing)
+          } else {
+            const ephemeral = { id: target.userId, name: target.userName, request_id: `ephemeral-${target.userId}`, deleted: false }
+            setFriends([ephemeral, ...data])
+            setSelected(ephemeral)
+          }
+          navigate(location.pathname, { replace: true, state: null })
+        } else {
+          setFriends(data)
+          if (data.length > 0) setSelected(data[0])
+        }
       }
     }
 

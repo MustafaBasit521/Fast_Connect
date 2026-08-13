@@ -26,6 +26,7 @@ async def create_user(user: UserSignUp):
     user_data["password"] = hashed_password.decode("utf-8")
     user_data["role"] = "user"
     user_data["status"] = "active"
+    user_data["is_private"] = False
 
     result = await db["users"].insert_one(user_data)
 
@@ -39,6 +40,7 @@ async def create_user(user: UserSignUp):
         phone=user.phone,
         role="user",
         status="active",
+        is_private=False,
     )
 
 
@@ -83,6 +85,7 @@ async def authenticate_user(credentials: UserLogin):
         phone=existing.get("phone"),
         role=existing.get("role", "user"),
         status=status,
+        is_private=existing.get("is_private", False),
     )
 
 def create_access_token(data: dict) -> str:

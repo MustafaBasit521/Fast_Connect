@@ -14,8 +14,6 @@ async def send_message(to_user_id: str, data: MessageCreate, current_user: UserO
         return await message_service.send_message(current_user.id, current_user.name, to_user_id, data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except PermissionError as e:
-        raise HTTPException(status_code=403, detail=str(e))
 
 
 @router.get("/{other_user_id}", response_model=list[MessageOut])
