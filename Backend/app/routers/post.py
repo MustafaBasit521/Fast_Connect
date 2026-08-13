@@ -14,13 +14,18 @@ async def create_post(data: PostCreate, current_user: UserOut = Depends(get_curr
 
 
 @router.get("", response_model=list[PostOut])
-async def get_feed(skip: int = 0, limit: int = 20, current_user: UserOut = Depends(get_current_user)):
-    return await post_service.get_feed(current_user.id, skip, limit)
+async def get_feed(
+    skip: int = 0,
+    limit: int = 20,
+    hashtag: str | None = None,
+    current_user: UserOut = Depends(get_current_user),
+):
+    return await post_service.get_feed(current_user.id, skip, limit, hashtag)
 
 
 @router.get("/trending", response_model=list[TrendingTopicOut])
-async def trending_topics(current_user: UserOut = Depends(get_current_user)):
-    return await post_service.get_trending_topics()
+async def trending_topics(limit: int = 5, current_user: UserOut = Depends(get_current_user)):
+    return await post_service.get_trending_topics(limit=limit)
 
 
 @router.get("/{post_id}", response_model=PostOut)

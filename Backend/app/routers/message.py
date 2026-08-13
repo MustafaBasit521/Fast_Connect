@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.schemas.message import MessageCreate, MessageOut
+from app.schemas.message import MessageCreate, MessageOut, RecentMessageOut
 from app.schemas.user import UserOut
 from app.services import message_service
 from app.dependencies import get_current_user
@@ -14,6 +14,11 @@ async def send_message(to_user_id: str, data: MessageCreate, current_user: UserO
         return await message_service.send_message(current_user.id, current_user.name, to_user_id, data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/recent", response_model=list[RecentMessageOut])
+async def recent_messages(current_user: UserOut = Depends(get_current_user)):
+    return await message_service.get_recent_messages(current_user.id)
 
 
 @router.get("/{other_user_id}", response_model=list[MessageOut])

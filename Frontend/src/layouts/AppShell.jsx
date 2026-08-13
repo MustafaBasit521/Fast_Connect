@@ -1,15 +1,25 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import { initials } from "../utils/initials"
 import Particles from "../components/Particles"
-import Fireflies from "../components/Fireflies"
+import NotificationsDropdown from "../components/NotificationsDropdown"
+
+const API = "https://fast-connect-bay.vercel.app"
+
+function authHeaders() {
+  const token = localStorage.getItem("token")
+  return { "Authorization": `Bearer ${token}` }
+}
 
 const navItems = [
   { to: "/feed", label: "Feed", icon: "🏠" },
   { to: "/friends", label: "Friends", icon: "👥" },
   { to: "/messages", label: "Messages", icon: "💬" },
+  { to: "/events", label: "Events", icon: "🎉" },
+  { to: "/resources", label: "Resources", icon: "📚" },
+  { to: "/campus-map", label: "Campus Map", icon: "🗺️" },
   { to: "/search", label: "Search", icon: "🔍" },
   { to: "/profile", label: "Profile", icon: "👤" },
 ]
@@ -20,7 +30,23 @@ function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [notifCount, setNotifCount] = useState(0)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+
+  useEffect(() => {
+    async function loadNotifCount() {
+      const [reqRes, msgRes] = await Promise.all([
+        fetch(`${API}/friends/requests`, { headers: authHeaders() }),
+        fetch(`${API}/messages/recent`, { headers: authHeaders() }),
+      ])
+      const requests = reqRes.ok ? await reqRes.json() : []
+      const messages = msgRes.ok ? await msgRes.json() : []
+      setNotifCount(requests.length + messages.length)
+    }
+
+    loadNotifCount()
+  }, [])
 
   function handleLogout() {
     logout()
@@ -28,7 +54,10 @@ function AppShell() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: "var(--color-bg)", backgroundImage: "var(--bg-pattern)", backgroundSize: "400px 400px" }}
+    >
       <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
         <div className="flex items-center gap-2">
           <button 
@@ -39,12 +68,7 @@ function AppShell() {
           >
             ☰
           </button>
-          <div
-            className="w-8 h-8 rounded flex items-center justify-center font-bold text-sm shrink-0"
-            style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
-          >
-            FC
-          </div>
+          <img src="/logo.svg" alt="FAST Connect" className="h-8 w-auto shrink-0" />
           <span className="font-semibold hidden sm:inline">FAST Connect</span>
         </div>
 
@@ -58,13 +82,31 @@ function AppShell() {
             {theme === "light" ? "🌙" : "☀️"}
           </button>
 
-          <button
-            aria-label="Notifications"
-            className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}
-          >
-            🔔
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setNotifOpen((v) => !v)}
+              aria-label="Notifications"
+              className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 relative"
+              style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}
+            >
+              🔔
+              {notifCount > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
+                  style={{ backgroundColor: "var(--color-danger)" }}
+                >
+                  {notifCount > 9 ? "9+" : notifCount}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setNotifOpen(false)} />
+                <NotificationsDropdown onClose={() => setNotifOpen(false)} />
+              </>
+            )}
+          </div>
 
           <button
             onClick={() => setMenuOpen((open) => !open)}
@@ -125,7 +167,7 @@ function AppShell() {
         </div>
 
         <div className="flex-1 p-4 md:p-6 pb-20 md:pb-6 relative overflow-hidden overflow-x-hidden">
-          {theme === "dark" ? <Fireflies count={18} /> : <Particles count={22} color="212, 168, 83" />}
+          {theme === "light" && <Particles count={22} color="212, 168, 83" />}
 
           <div className="relative z-10">
             <Outlet />

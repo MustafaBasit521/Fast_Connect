@@ -42,8 +42,12 @@ async def create_post(author_id: str, author_name: str, data: PostCreate) -> Pos
     return _to_post_out(post_data, author_id)
 
 
-async def get_feed(current_user_id: str, skip: int = 0, limit: int = 20) -> list[PostOut]:
-    cursor = db["posts"].find().sort("created_at", -1).skip(skip).limit(limit)
+async def get_feed(current_user_id: str, skip: int = 0, limit: int = 20, hashtag: str | None = None) -> list[PostOut]:
+    query = {}
+    if hashtag:
+        query["hashtags"] = hashtag.lower().lstrip("#")
+
+    cursor = db["posts"].find(query).sort("created_at", -1).skip(skip).limit(limit)
 
     posts = []
     async for post in cursor:

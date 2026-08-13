@@ -17,6 +17,10 @@ import MessagesPage from "./pages/MessagesPage"
 import MyProfile from "./pages/MyProfile"
 import SearchProfile from "./pages/SearchProfile"
 import ViewProfile from "./pages/ViewProfile"
+import EventsPage from "./pages/EventsPage"
+import ResourcesPage from "./pages/ResourcesPage"
+import CampusMapPage from "./pages/CampusMapPage"
+import TrendingPage from "./pages/TrendingPage"
 
 function App() {
   return (
@@ -45,6 +49,10 @@ function App() {
               <Route path="/profile" element={<MyProfile />} />
               <Route path="/search" element={<SearchProfile />} />
               <Route path="/profile/:userId" element={<ViewProfile />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/resources" element={<ResourcesPage />} />
+              <Route path="/campus-map" element={<CampusMapPage />} />
+              <Route path="/trending" element={<TrendingPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/feed" replace />} />

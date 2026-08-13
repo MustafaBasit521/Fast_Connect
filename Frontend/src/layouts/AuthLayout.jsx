@@ -2,7 +2,6 @@ import { Outlet } from "react-router-dom"
 import { useTheme } from "../context/ThemeContext"
 import Typewriter from "../components/Typewriter"
 import Particles from "../components/Particles"
-import Fireflies from "../components/Fireflies"
 
 function AuthLayout() {
   const { theme, toggleTheme } = useTheme()
@@ -22,15 +21,10 @@ function AuthLayout() {
         className="hidden md:flex md:w-1/2 relative overflow-hidden flex-col justify-between p-12"
         style={{ backgroundColor: "var(--color-panel)", color: "var(--color-panel-text)" }}
       >
-        {theme === "dark" ? <Fireflies /> : <Particles />}
+        {theme === "light" && <Particles />}
 
         <div className="flex items-center gap-2 relative z-10">
-          <div
-            className="w-8 h-8 rounded flex items-center justify-center font-bold"
-            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
-          >
-            FC
-          </div>
+          <img src="/logo.svg" alt="FAST Connect" className="h-8 w-auto" />
           <span className="font-semibold text-lg">
             <Typewriter text="FAST Connect" />
           </span>

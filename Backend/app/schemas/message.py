@@ -12,3 +12,10 @@ class MessageOut(BaseModel):
     to_user_id: str
     content: str
     created_at: datetime
+
+
+class RecentMessageOut(BaseModel):
+    from_user_id: str
+    from_user_name: str
+    content: str
+    created_at: datetime

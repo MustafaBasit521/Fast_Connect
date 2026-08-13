@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { initials } from "../utils/initials"
 import { getErrorMessage } from "../utils/errors"
@@ -73,6 +73,8 @@ function CommentSection({ postId, currentUserId }) {
 
 function Feed() {
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
+  const hashtagFilter = searchParams.get("hashtag")
   const [posts, setPosts] = useState([])
   const [content, setContent] = useState("")
   const [imageFile, setImageFile] = useState(null)
@@ -83,6 +85,8 @@ function Feed() {
   const [editContent, setEditContent] = useState("")
   const [loading, setLoading] = useState(true)
   const [trending, setTrending] = useState([])
+  const [nextEvent, setNextEvent] = useState(null)
+  const [resourceCount, setResourceCount] = useState(null)
 
   function handleImageSelect(e) {
     const file = e.target.files[0]
@@ -100,39 +104,49 @@ function Feed() {
 
   async function loadFeed() {
     setLoading(true)
-    const response = await fetch("https://fast-connect-bay.vercel.app/posts", {
+    const query = hashtagFilter ? `?hashtag=${encodeURIComponent(hashtagFilter)}` : ""
+    const response = await fetch(`https://fast-connect-bay.vercel.app/posts${query}`, {
       headers: authHeaders(),
     })
     const data = await response.json()
 
     if (response.ok) {
       setPosts(data)
-      
-      // Calculate real trending hashtags from posts
-      const hashtagCounts = {}
-      data.forEach(post => {
-        const words = (post.content || "").split(/\s+/)
-        words.forEach(word => {
-          if (word.startsWith("#") && word.length > 1) {
-            hashtagCounts[word] = (hashtagCounts[word] || 0) + 1
-          }
-        })
-      })
-      
-      const sortedTags = Object.entries(hashtagCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(entry => entry[0])
-        
-      setTrending(sortedTags)
     } else {
       addToast(getErrorMessage(data), "error")
     }
     setLoading(false)
   }
 
+  async function loadTrending() {
+    const response = await fetch("https://fast-connect-bay.vercel.app/posts/trending", {
+      headers: authHeaders(),
+    })
+    if (response.ok) setTrending(await response.json())
+  }
+
+  async function loadSidebarPreviews() {
+    const [eventsRes, resourcesRes] = await Promise.all([
+      fetch("https://fast-connect-bay.vercel.app/events", { headers: authHeaders() }),
+      fetch("https://fast-connect-bay.vercel.app/resources", { headers: authHeaders() }),
+    ])
+    if (eventsRes.ok) {
+      const events = await eventsRes.json()
+      setNextEvent(events[0] || null)
+    }
+    if (resourcesRes.ok) {
+      const resources = await resourcesRes.json()
+      setResourceCount(resources.length)
+    }
+  }
+
   useEffect(() => {
     loadFeed()
+  }, [hashtagFilter])
+
+  useEffect(() => {
+    loadTrending()
+    loadSidebarPreviews()
   }, [])
 
   async function handleCreate(e) {
@@ -219,10 +233,17 @@ function Feed() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto flex gap-8">
+    <div className="max-w-[90rem] mx-auto flex gap-8">
       {/* Main Feed Column */}
-      <div className="flex-1 max-w-3xl">
+      <div className="flex-1 min-w-0">
         <h1 className="text-2xl font-bold mb-4">Feed</h1>
+
+        {hashtagFilter && (
+          <div className="flex items-center justify-between mb-4 px-4 py-2 rounded-lg" style={{ backgroundColor: "var(--color-border)" }}>
+            <span className="text-sm font-medium">Filtered by <strong>#{hashtagFilter}</strong></span>
+            <Link to="/feed" className="text-sm" style={{ color: "var(--color-accent)" }}>Clear ×</Link>
+          </div>
+        )}
 
       <div className="post-card border rounded-lg p-4 mb-4 flex items-start gap-3" style={{ borderColor: "var(--color-border)" }}>
         <div
@@ -362,6 +383,36 @@ function Feed() {
       <div className="w-80 shrink-0 hidden md:flex flex-col gap-6 mt-[3.2rem]">
         <FlipClock />
         
+        {/* Campus Events quick-link card */}
+        <Link
+          to="/events"
+          className="p-5 rounded-xl flex items-center gap-4 hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: "var(--color-bg, #1a1a2e)", border: "1px solid var(--color-border, #333)" }}
+        >
+          <span className="text-3xl shrink-0">🎉</span>
+          <div>
+            <h2 className="text-sm font-bold">Campus Events</h2>
+            <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+              {nextEvent ? nextEvent.title : "See what's happening on campus"}
+            </p>
+          </div>
+        </Link>
+
+        {/* Resource Sharing quick-link card
+        <Link
+          to="/resources"
+          className="p-5 rounded-xl flex items-center gap-4 hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: "var(--color-bg, #1a1a2e)", border: "1px solid var(--color-border, #333)" }}
+        >
+          <span className="text-3xl shrink-0">📚</span>
+          <div>
+            <h2 className="text-sm font-bold">Resource Sharing</h2>
+            <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+              {resourceCount != null ? `${resourceCount} shared notes & files` : "Share notes & projects"}
+            </p>
+          </div>
+        </Link> */}
+
         {/* Trending Topics Box */}
         <div className="p-5 rounded-xl" style={{ backgroundColor: "var(--color-bg, #1a1a2e)", border: "1px solid var(--color-border, #333)" }}>
            <div className="flex justify-between items-center mb-4">
@@ -371,19 +422,42 @@ function Feed() {
            
            <div className="flex flex-col gap-3">
              {trending.length > 0 ? (
-               trending.map((tag, idx) => (
-                 <div key={idx} className="flex flex-col">
-                   <span className="text-xs text-gray-500">{idx + 1}. Campus Trend</span>
-                   <span className="font-semibold text-sm">{tag}</span>
-                 </div>
+               trending.map((topic, idx) => (
+                 <Link key={topic.tag} to={`/feed?hashtag=${encodeURIComponent(topic.tag)}`} className="flex items-center justify-between hover:opacity-80 transition-opacity">
+                   <span className="font-semibold text-sm">{idx + 1}. #{topic.tag}</span>
+                   <span className="text-xs text-gray-500">{topic.count} posts</span>
+                 </Link>
                ))
              ) : (
-               <p className="text-xs text-gray-500 italic">No trending topics right now. Post with a hashtag to start a trend!</p>
+               <p className="text-xs text-gray-500 italic">No trending topics right now. Post with a #hashtag to start a trend!</p>
              )}
            </div>
         </div>
 
         <SuggestionsBox />
+
+        {/* Quick Links */}
+        <div className="p-5 rounded-xl" style={{ backgroundColor: "var(--color-bg, #1a1a2e)", border: "1px solid var(--color-border, #333)" }}>
+          <h2 className="text-sm font-bold mb-3">Quick Links</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <Link to="/campus-map" className="rounded-lg p-3 text-center hover:opacity-80 transition-opacity" style={{ border: "1px solid var(--color-border)" }}>
+              <div className="text-xl mb-1">🗺️</div>
+              <p className="text-xs font-medium">Campus Map</p>
+            </Link>
+            <div className="rounded-lg p-3 text-center opacity-50 cursor-default" style={{ border: "1px solid var(--color-border)" }}>
+              <div className="text-xl mb-1">📖</div>
+              <p className="text-xs font-medium">Library</p>
+            </div>
+            <div className="rounded-lg p-3 text-center opacity-50 cursor-default" style={{ border: "1px solid var(--color-border)" }}>
+              <div className="text-xl mb-1">🎧</div>
+              <p className="text-xs font-medium">IT Support</p>
+            </div>
+            <div className="rounded-lg p-3 text-center opacity-50 cursor-default" style={{ border: "1px solid var(--color-border)" }}>
+              <div className="text-xl mb-1">🎓</div>
+              <p className="text-xs font-medium">Student Portal</p>
+            </div>
+          </div>
+        </div>
 
         {/* Instagram-style Footer */}
         <div className="mt-4 text-xs text-gray-500 flex flex-col gap-2 px-2">
