@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom"
 import { useTheme } from "../context/ThemeContext"
-import Typewriter from "../components/Typewriter"
 import Particles from "../components/Particles"
+import Logo from "../components/Logo"
 
 function AuthLayout() {
   const { theme, toggleTheme } = useTheme()
@@ -23,11 +23,8 @@ function AuthLayout() {
       >
         {theme === "light" && <Particles />}
 
-        <div className="flex items-center gap-2 relative z-10">
-          <img src="/logo.svg" alt="FAST Connect" className="h-8 w-auto" />
-          <span className="font-semibold text-lg">
-            <Typewriter text="FAST Connect" />
-          </span>
+        <div className="relative z-10">
+          <Logo className="h-9 w-auto" />
         </div>
 
         <div className="relative z-10">
@@ -38,8 +35,12 @@ function AuthLayout() {
         <p className="text-sm opacity-60 relative z-10">LAHORE CAMPUS · lhr.nu.edu.pk</p>
       </div>
 
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
-        <div className="w-full max-w-sm">
+      <div className="w-full md:w-1/2 flex flex-col md:items-center md:justify-center p-6 sm:p-8">
+        <div className="flex md:hidden items-center mb-8 mt-4">
+          <Logo className="h-8 w-auto" />
+        </div>
+
+        <div className="w-full max-w-sm md:mx-auto">
           <Outlet />
         </div>
       </div>

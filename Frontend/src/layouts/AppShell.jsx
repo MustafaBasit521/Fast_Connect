@@ -5,6 +5,7 @@ import { useTheme } from "../context/ThemeContext"
 import { initials } from "../utils/initials"
 import Particles from "../components/Particles"
 import NotificationsDropdown from "../components/NotificationsDropdown"
+import Logo from "../components/Logo"
 
 const API = "https://fast-connect-bay.vercel.app"
 
@@ -68,8 +69,7 @@ function AppShell() {
           >
             ☰
           </button>
-          <img src="/logo.svg" alt="FAST Connect" className="h-8 w-auto shrink-0" />
-          <span className="font-semibold hidden sm:inline">FAST Connect</span>
+          <Logo className="h-7 w-auto shrink-0" />
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 relative">
