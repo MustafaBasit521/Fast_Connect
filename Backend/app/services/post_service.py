@@ -1,10 +1,17 @@
-from datetime import datetime, timezone
+import re
+from datetime import datetime, timedelta, timezone
 
 from bson import ObjectId
 from bson.errors import InvalidId
 
 from app.database.connection import db
-from app.schemas.post import PostCreate, PostUpdate, PostOut
+from app.schemas.post import PostCreate, PostUpdate, PostOut, TrendingTopicOut
+
+HASHTAG_PATTERN = re.compile(r"#(\w+)")
+
+
+def _extract_hashtags(content: str) -> list[str]:
+    return list({tag.lower() for tag in HASHTAG_PATTERN.findall(content)})
 
 
 def _to_post_out(post: dict, current_user_id: str) -> PostOut:
@@ -26,6 +33,7 @@ async def create_post(author_id: str, author_name: str, data: PostCreate) -> Pos
     post_data["author_id"] = author_id
     post_data["author_name"] = author_name
     post_data["likes"] = []
+    post_data["hashtags"] = _extract_hashtags(data.content)
     post_data["created_at"] = datetime.now(timezone.utc)
 
     result = await db["posts"].insert_one(post_data)
@@ -125,3 +133,18 @@ async def unlike_post(post_id: str, current_user_id: str) -> PostOut:
         raise ValueError("Post not found")
 
     return _to_post_out(post, current_user_id)
+
+
+async def get_trending_topics(hours: int = 48, limit: int = 5) -> list[TrendingTopicOut]:
+    since = datetime.now(timezone.utc) - timedelta(hours=hours)
+
+    pipeline = [
+        {"$match": {"created_at": {"$gte": since}, "hashtags": {"$ne": []}}},
+        {"$unwind": "$hashtags"},
+        {"$group": {"_id": "$hashtags", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": limit},
+    ]
+
+    cursor = db["posts"].aggregate(pipeline)
+    return [TrendingTopicOut(tag=doc["_id"], count=doc["count"]) async for doc in cursor]

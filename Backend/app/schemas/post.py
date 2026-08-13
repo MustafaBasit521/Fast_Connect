@@ -22,3 +22,8 @@ class PostOut(BaseModel):
     likes_count: int
     liked_by_me: bool
     created_at: datetime
+
+
+class TrendingTopicOut(BaseModel):
+    tag: str
+    count: int

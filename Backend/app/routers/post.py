@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.schemas.post import PostCreate, PostUpdate, PostOut
+from app.schemas.post import PostCreate, PostUpdate, PostOut, TrendingTopicOut
 from app.schemas.user import UserOut
 from app.services import post_service
 from app.dependencies import get_current_user
@@ -16,6 +16,11 @@ async def create_post(data: PostCreate, current_user: UserOut = Depends(get_curr
 @router.get("", response_model=list[PostOut])
 async def get_feed(skip: int = 0, limit: int = 20, current_user: UserOut = Depends(get_current_user)):
     return await post_service.get_feed(current_user.id, skip, limit)
+
+
+@router.get("/trending", response_model=list[TrendingTopicOut])
+async def trending_topics(current_user: UserOut = Depends(get_current_user)):
+    return await post_service.get_trending_topics()
 
 
 @router.get("/{post_id}", response_model=PostOut)

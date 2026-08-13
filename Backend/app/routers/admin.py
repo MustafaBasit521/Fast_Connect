@@ -6,7 +6,7 @@ from bson.errors import InvalidId
 
 from app.schemas.user import UserOut
 from app.database.connection import db
-from app.services import post_service, comment_service, blog_service, profile_service
+from app.services import post_service, comment_service, blog_service, profile_service, event_service, resource_service
 from app.dependencies import get_current_admin
 
 TEMP_BAN_DAYS = 7
@@ -143,3 +143,23 @@ async def delete_blog(blog_id: str, admin: UserOut = Depends(get_current_admin))
         raise HTTPException(status_code=404, detail=str(e))
 
     return {"message": "Blog deleted"}
+
+
+@router.delete("/events/{event_id}")
+async def delete_event(event_id: str, admin: UserOut = Depends(get_current_admin)):
+    try:
+        await event_service.delete_event(event_id, admin.id, is_admin=True)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return {"message": "Event deleted"}
+
+
+@router.delete("/resources/{resource_id}")
+async def delete_resource(resource_id: str, admin: UserOut = Depends(get_current_admin)):
+    try:
+        await resource_service.delete_resource(resource_id, admin.id, is_admin=True)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return {"message": "Resource deleted"}
