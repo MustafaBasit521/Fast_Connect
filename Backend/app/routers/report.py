@@ -3,13 +3,13 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.report import ReportCreate, ReportOut, ReportResolve
 from app.schemas.user import UserOut
 from app.services import report_service
-from app.dependencies import get_current_user, get_current_admin
+from app.dependencies import get_current_user, get_current_admin, user_rate_limit
 
 router = APIRouter()
 
 
 @router.post("", response_model=ReportOut)
-async def create_report(data: ReportCreate, current_user: UserOut = Depends(get_current_user)):
+async def create_report(data: ReportCreate, current_user: UserOut = Depends(user_rate_limit("report", 10, 3600))):
     return await report_service.create_report(current_user.id, current_user.name, data)
 
 

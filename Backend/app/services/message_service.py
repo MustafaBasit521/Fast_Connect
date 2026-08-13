@@ -60,7 +60,7 @@ async def get_recent_messages(current_user_id: str, limit: int = 5) -> list[Rece
     ]
 
     results = []
-    async for doc in db["messages"].aggregate(pipeline):
+    async for doc in await db["messages"].aggregate(pipeline):
         from_id = doc["_id"]
         try:
             user = await db["users"].find_one({"_id": ObjectId(from_id)})

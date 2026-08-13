@@ -13,6 +13,7 @@ class UserOut(BaseModel):
     role: str = "user"
     status: str = "active"
     is_private: bool = False
+    email_verified: bool = False
 
 class UserSignUp(BaseModel):
     name:str=Field(...,min_length=3,description='Enter your name')
@@ -42,6 +43,9 @@ class ForgotPassword(BaseModel):
 class ResetPassword(BaseModel):
     token:str
     new_password:str=Field(...,min_length=8)
+
+class VerifyEmail(BaseModel):
+    token: str
 
 class ProfileUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=3)

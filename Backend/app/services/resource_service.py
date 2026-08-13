@@ -35,14 +35,16 @@ async def create_resource(user_id: str, user_name: str, data: ResourceCreate) ->
     return _to_resource_out(resource_data)
 
 
-async def list_resources(course_code: str | None = None, search: str | None = None) -> list[ResourceOut]:
+async def list_resources(
+    course_code: str | None = None, search: str | None = None, skip: int = 0, limit: int = 20
+) -> list[ResourceOut]:
     query = {}
     if course_code:
         query["course_code"] = {"$regex": f"^{course_code}$", "$options": "i"}
     if search:
         query["title"] = {"$regex": search, "$options": "i"}
 
-    cursor = db["resources"].find(query).sort("created_at", -1)
+    cursor = db["resources"].find(query).sort("created_at", -1).skip(skip).limit(limit)
 
     resources = []
     async for resource in cursor:

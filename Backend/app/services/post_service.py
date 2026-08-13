@@ -150,5 +150,5 @@ async def get_trending_topics(hours: int = 48, limit: int = 5) -> list[TrendingT
         {"$limit": limit},
     ]
 
-    cursor = db["posts"].aggregate(pipeline)
+    cursor = await db["posts"].aggregate(pipeline)
     return [TrendingTopicOut(tag=doc["_id"], count=doc["count"]) async for doc in cursor]

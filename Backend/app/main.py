@@ -1,7 +1,13 @@
+import logging
 from datetime import datetime
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logger = logging.getLogger("fastconnect")
+
 app = FastAPI()
 
 from app.database.connection import db
@@ -23,6 +29,7 @@ from app.routers.location import router as location_router
 from app.services.chatbot_service import ensure_indexes as ensure_chatbot_indexes
 from app.services.event_service import ensure_indexes as ensure_event_indexes
 from app.services.resource_service import ensure_indexes as ensure_resource_indexes
+from app.services.rate_limit_service import ensure_indexes as ensure_rate_limit_indexes
 
 
 app.add_middleware(
@@ -60,6 +67,15 @@ async def on_startup():
     await ensure_chatbot_indexes()
     await ensure_event_indexes()
     await ensure_resource_indexes()
+    await ensure_rate_limit_indexes()
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    # Full detail goes to server-side logs (visible in the Vercel dashboard); the
+    # client only ever sees a generic message, never internals/stack traces.
+    logger.error("Unhandled exception on %s %s: %s", request.method, request.url.path, exc, exc_info=True)
+    return JSONResponse(status_code=500, content={"detail": "Something went wrong. Please try again."})
 
 
 @app.get("/")

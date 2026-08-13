@@ -3,13 +3,13 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.post import PostCreate, PostUpdate, PostOut, TrendingTopicOut
 from app.schemas.user import UserOut
 from app.services import post_service
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, user_rate_limit
 
 router = APIRouter()
 
 
 @router.post("", response_model=PostOut)
-async def create_post(data: PostCreate, current_user: UserOut = Depends(get_current_user)):
+async def create_post(data: PostCreate, current_user: UserOut = Depends(user_rate_limit("post", 20, 3600))):
     return await post_service.create_post(current_user.id, current_user.name, data)
 
 

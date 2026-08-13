@@ -218,26 +218,44 @@ function CreateEventForm({ onCreated, onClose }) {
   )
 }
 
+const PAGE_SIZE = 20
+
 function EventsPage() {
   const { user } = useAuth()
   const { addToast } = useToast()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
   const [category, setCategory] = useState("All")
   const [showForm, setShowForm] = useState(false)
 
   async function loadEvents(cat) {
     setLoading(true)
-    const query = cat && cat !== "All" ? `?category=${encodeURIComponent(cat)}` : ""
-    const response = await fetch(`${API}/events${query}`, { headers: authHeaders() })
+    const catQuery = cat && cat !== "All" ? `&category=${encodeURIComponent(cat)}` : ""
+    const response = await fetch(`${API}/events?skip=0&limit=${PAGE_SIZE}${catQuery}`, { headers: authHeaders() })
     const data = await response.json()
 
     if (response.ok) {
       setEvents(data)
+      setHasMore(data.length === PAGE_SIZE)
     } else {
       addToast(getErrorMessage(data), "error")
     }
     setLoading(false)
+  }
+
+  async function loadMore() {
+    setLoadingMore(true)
+    const catQuery = category && category !== "All" ? `&category=${encodeURIComponent(category)}` : ""
+    const response = await fetch(`${API}/events?skip=${events.length}&limit=${PAGE_SIZE}${catQuery}`, { headers: authHeaders() })
+    const data = await response.json()
+
+    if (response.ok) {
+      setEvents((prev) => [...prev, ...data])
+      setHasMore(data.length === PAGE_SIZE)
+    }
+    setLoadingMore(false)
   }
 
   useEffect(() => {
@@ -300,17 +318,30 @@ function EventsPage() {
       ) : events.length === 0 ? (
         <EmptyState icon="🎉" title="No events yet" message="Be the first to organize something for your campus!" />
       ) : (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {events.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              onToggleGoing={handleToggleGoing}
-              onDelete={handleDelete}
-              isMine={event.organizer_id === user?.id}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {events.map((event) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                onToggleGoing={handleToggleGoing}
+                onDelete={handleDelete}
+                isMine={event.organizer_id === user?.id}
+              />
+            ))}
+          </div>
+
+          {hasMore && (
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="self-center rounded px-4 py-2 text-sm font-medium disabled:opacity-50"
+              style={{ border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+            >
+              {loadingMore ? "Loading..." : "Load more"}
+            </button>
+          )}
+        </>
       )}
     </div>
   )

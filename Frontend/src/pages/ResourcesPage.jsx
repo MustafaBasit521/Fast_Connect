@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext"
 import { EmptyState } from "../components/EmptyState"
 
 const API = "https://fast-connect-bay.vercel.app"
+const PAGE_SIZE = 20
 
 const FILE_ICONS = {
   PDF: "📄",
@@ -184,6 +185,8 @@ function ResourcesPage() {
   const { addToast } = useToast()
   const [resources, setResources] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
   const [search, setSearch] = useState("")
   const [courseCode, setCourseCode] = useState("")
   const [showForm, setShowForm] = useState(false)
@@ -193,16 +196,37 @@ function ResourcesPage() {
     const params = new URLSearchParams()
     if (search) params.set("search", search)
     if (courseCode) params.set("course_code", courseCode)
+    params.set("skip", "0")
+    params.set("limit", String(PAGE_SIZE))
 
     const response = await fetch(`${API}/resources?${params.toString()}`, { headers: authHeaders() })
     const data = await response.json()
 
     if (response.ok) {
       setResources(data)
+      setHasMore(data.length === PAGE_SIZE)
     } else {
       addToast(getErrorMessage(data), "error")
     }
     setLoading(false)
+  }
+
+  async function loadMore() {
+    setLoadingMore(true)
+    const params = new URLSearchParams()
+    if (search) params.set("search", search)
+    if (courseCode) params.set("course_code", courseCode)
+    params.set("skip", String(resources.length))
+    params.set("limit", String(PAGE_SIZE))
+
+    const response = await fetch(`${API}/resources?${params.toString()}`, { headers: authHeaders() })
+    const data = await response.json()
+
+    if (response.ok) {
+      setResources((prev) => [...prev, ...data])
+      setHasMore(data.length === PAGE_SIZE)
+    }
+    setLoadingMore(false)
   }
 
   useEffect(() => {
@@ -267,17 +291,30 @@ function ResourcesPage() {
       ) : resources.length === 0 ? (
         <EmptyState icon="📚" title="No resources yet" message="Share your notes, past papers, or project files with the campus." />
       ) : (
-        <div className="flex flex-col gap-3">
-          {resources.map((resource) => (
-            <ResourceCard
-              key={resource.id}
-              resource={resource}
-              onDownload={handleDownload}
-              onDelete={handleDelete}
-              isMine={resource.uploaded_by_id === user?.id}
-            />
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-3">
+            {resources.map((resource) => (
+              <ResourceCard
+                key={resource.id}
+                resource={resource}
+                onDownload={handleDownload}
+                onDelete={handleDelete}
+                isMine={resource.uploaded_by_id === user?.id}
+              />
+            ))}
+          </div>
+
+          {hasMore && (
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="self-center rounded px-4 py-2 text-sm font-medium disabled:opacity-50"
+              style={{ border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+            >
+              {loadingMore ? "Loading..." : "Load more"}
+            </button>
+          )}
+        </>
       )}
     </div>
   )

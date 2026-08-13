@@ -7,6 +7,7 @@ import jwt
 from app.database.connection import db
 from app.schemas.user import UserOut
 from app.services.auth_service import SECRET_KEY, JWT_ALGORITHM
+from app.services.rate_limit_service import enforce_rate_limit
 
 security = HTTPBearer()
 
@@ -65,6 +66,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         role=user.get("role", "user"),
         status=user.get("status", "active"),
         is_private=user.get("is_private", False),
+        email_verified=user.get("email_verified", False),
     )
 
 
@@ -73,3 +75,13 @@ async def get_current_admin(current_user: UserOut = Depends(get_current_user)) -
         raise HTTPException(status_code=403, detail="Admin privileges required")
 
     return current_user
+
+
+def user_rate_limit(prefix: str, max_requests: int, window_seconds: int):
+    """Dependency factory for authenticated routes — keys by user id, not IP
+    (many students share campus wifi/NAT, so IP-keying would rate-limit them together)."""
+    async def dependency(current_user: UserOut = Depends(get_current_user)) -> UserOut:
+        await enforce_rate_limit(f"{prefix}:{current_user.id}", max_requests, window_seconds)
+        return current_user
+
+    return dependency

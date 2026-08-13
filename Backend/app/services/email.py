@@ -88,3 +88,16 @@ def send_password_reset_email(to_email: str, to_name: str, reset_token: str):
         text=f"Hi {to_name}, use this token to reset your password: {reset_token}",
         html=f"<p>Hi <strong>{to_name}</strong>, use this token to reset your password: <strong>{reset_token}</strong></p>",
     )
+
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://fast-connect-frontend-three.vercel.app")
+
+
+def send_verification_email(to_email: str, to_name: str, verification_token: str):
+    link = f"{FRONTEND_URL}/verify-email?token={verification_token}"
+    send_email(
+        to=to_email,
+        subject="Verify your FAST Connect email",
+        text=f"Hi {to_name}, please verify your email by visiting this link: {link}",
+        html=f"<p>Hi <strong>{to_name}</strong>, please verify your email by clicking below:</p><p><a href=\"{link}\">Verify my email</a></p>",
+    )

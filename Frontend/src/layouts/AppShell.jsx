@@ -6,6 +6,8 @@ import { initials } from "../utils/initials"
 import Particles from "../components/Particles"
 import NotificationsDropdown from "../components/NotificationsDropdown"
 import Logo from "../components/Logo"
+import { useToast } from "../context/ToastContext"
+import { getErrorMessage } from "../utils/errors"
 
 const API = "https://fast-connect-bay.vercel.app"
 
@@ -28,12 +30,28 @@ const navItems = [
 function AppShell() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { addToast } = useToast()
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifCount, setNotifCount] = useState(0)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [verifyBannerDismissed, setVerifyBannerDismissed] = useState(false)
+  const [resending, setResending] = useState(false)
+
+  async function handleResendVerification() {
+    setResending(true)
+    const response = await fetch(`${API}/auth/resend-verification`, { method: "POST", headers: authHeaders() })
+    const data = await response.json()
+    setResending(false)
+
+    if (response.ok) {
+      addToast("Verification email sent — check your inbox.", "success")
+    } else {
+      addToast(getErrorMessage(data), "error")
+    }
+  }
 
   useEffect(() => {
     async function loadNotifCount() {
@@ -139,6 +157,21 @@ function AppShell() {
           )}
         </div>
       </div>
+
+      {user && !user.email_verified && !verifyBannerDismissed && (
+        <div
+          className="flex items-center justify-between gap-3 px-4 md:px-6 py-2 text-sm flex-wrap"
+          style={{ backgroundColor: "rgba(212, 168, 83, 0.15)", borderBottom: "1px solid var(--color-border)" }}
+        >
+          <span>📧 Please verify your email to make sure you don't lose access to your account.</span>
+          <div className="flex items-center gap-3 shrink-0">
+            <button onClick={handleResendVerification} disabled={resending} className="font-semibold disabled:opacity-50" style={{ color: "var(--color-accent)" }}>
+              {resending ? "Sending..." : "Resend email"}
+            </button>
+            <button onClick={() => setVerifyBannerDismissed(true)} aria-label="Dismiss" style={{ color: "var(--color-muted)" }}>×</button>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1 overflow-hidden">
         <div 

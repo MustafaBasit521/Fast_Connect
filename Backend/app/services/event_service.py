@@ -40,12 +40,14 @@ async def create_event(organizer_id: str, organizer_name: str, data: EventCreate
     return _to_event_out(event_data, organizer_id)
 
 
-async def list_upcoming_events(current_user_id: str, category: str | None = None) -> list[EventOut]:
+async def list_upcoming_events(
+    current_user_id: str, category: str | None = None, skip: int = 0, limit: int = 20
+) -> list[EventOut]:
     query = {"end_time": {"$gte": datetime.now(timezone.utc)}}
     if category:
         query["category"] = category
 
-    cursor = db["events"].find(query).sort("start_time", 1)
+    cursor = db["events"].find(query).sort("start_time", 1).skip(skip).limit(limit)
 
     events = []
     async for event in cursor:

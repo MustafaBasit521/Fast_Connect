@@ -17,9 +17,11 @@ async def create_resource(data: ResourceCreate, current_user: UserOut = Depends(
 async def list_resources(
     course_code: str | None = None,
     search: str | None = None,
+    skip: int = 0,
+    limit: int = 20,
     current_user: UserOut = Depends(get_current_user),
 ):
-    return await resource_service.list_resources(course_code, search)
+    return await resource_service.list_resources(course_code, search, skip, limit)
 
 
 @router.get("/{resource_id}", response_model=ResourceOut)

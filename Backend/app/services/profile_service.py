@@ -15,6 +15,7 @@ def _to_user_out(user: dict) -> UserOut:
         role=user.get("role", "user"),
         status=user.get("status", "active"),
         is_private=user.get("is_private", False),
+        email_verified=user.get("email_verified", False),
     )
 
 

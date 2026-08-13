@@ -188,6 +188,7 @@ async def discover_users(current_user_id: str) -> list[UserOut]:
             role=user.get("role", "user"),
             status=user.get("status", "active"),
             is_private=user.get("is_private", False),
+            email_verified=user.get("email_verified", False),
         ))
 
     return users

@@ -3,13 +3,13 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.chatbot import ChatRequest, ChatResponse, ChatMessageOut
 from app.schemas.user import UserOut
 from app.services import chatbot_service
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, user_rate_limit
 
 router = APIRouter()
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(data: ChatRequest, current_user: UserOut = Depends(get_current_user)):
+async def chat(data: ChatRequest, current_user: UserOut = Depends(user_rate_limit("chatbot", 20, 3600))):
     try:
         return await chatbot_service.send_message(current_user.id, current_user.name, data.message)
     except chatbot_service.AIConfigError as e:

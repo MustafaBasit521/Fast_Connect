@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 from app.database.connection import db
 from app.schemas.user import UserSignUp, UserLogin, UserOut,ChangePassword
-from app.services.email import send_welcome_email, send_password_reset_email
+from app.services.email import send_welcome_email, send_password_reset_email, send_verification_email
 
 load_dotenv()
 
@@ -27,10 +27,14 @@ async def create_user(user: UserSignUp):
     user_data["role"] = "user"
     user_data["status"] = "active"
     user_data["is_private"] = False
+    user_data["email_verified"] = False
 
     result = await db["users"].insert_one(user_data)
 
     asyncio.create_task(asyncio.to_thread(send_welcome_email, user.name, user.email))
+
+    verification_token = create_verification_token(user.email)
+    asyncio.create_task(asyncio.to_thread(send_verification_email, user.email, user.name, verification_token))
 
     return UserOut(
         id=str(result.inserted_id),
@@ -41,6 +45,7 @@ async def create_user(user: UserSignUp):
         role="user",
         status="active",
         is_private=False,
+        email_verified=False,
     )
 
 
@@ -86,11 +91,12 @@ async def authenticate_user(credentials: UserLogin):
         role=existing.get("role", "user"),
         status=status,
         is_private=existing.get("is_private", False),
+        email_verified=existing.get("email_verified", False),
     )
 
 def create_access_token(data: dict) -> str:
     payload = data.copy()
-    payload["exp"] = datetime.now(timezone.utc) + timedelta(hours=1)
+    payload["exp"] = datetime.now(timezone.utc) + timedelta(days=7)
 
     token = jwt.encode(payload, SECRET_KEY, algorithm=JWT_ALGORITHM)
 
@@ -117,6 +123,42 @@ def create_reset_token(email: str) -> str:
     payload = {"sub": email, "purpose": "password_reset"}
     payload["exp"] = datetime.now(timezone.utc) + timedelta(minutes=15)
     return jwt.encode(payload, SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+
+def create_verification_token(email: str) -> str:
+    payload = {"sub": email, "purpose": "email_verification"}
+    payload["exp"] = datetime.now(timezone.utc) + timedelta(hours=24)
+    return jwt.encode(payload, SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+
+async def verify_email(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise ValueError("Verification link expired. Request a new one.")
+    except jwt.InvalidTokenError:
+        raise ValueError("Invalid verification link")
+
+    if payload.get("purpose") != "email_verification":
+        raise ValueError("Invalid verification token")
+
+    email = payload.get("sub")
+
+    result = await db["users"].update_one({"email": email}, {"$set": {"email_verified": True}})
+    if result.matched_count == 0:
+        raise ValueError("User not found")
+
+
+async def resend_verification(email: str):
+    existing = await db["users"].find_one({"email": email})
+    if existing is None:
+        raise ValueError("User not found")
+
+    if existing.get("email_verified"):
+        raise ValueError("Your email is already verified")
+
+    token = create_verification_token(email)
+    asyncio.create_task(asyncio.to_thread(send_verification_email, email, existing["name"], token))
 
 
 async def forgot_password(email: str):

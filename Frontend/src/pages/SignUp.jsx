@@ -96,6 +96,12 @@ function SignUp() {
         </div>
 
         <MagneticButton type="submit" className="mt-4 w-full rounded py-2 font-bold" style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}>Sign Up</MagneticButton>
+
+        <p className="text-xs text-center" style={{ color: "var(--color-muted)" }}>
+          By signing up you agree to our{" "}
+          <Link to="/terms" className="underline">Terms of Service</Link> and{" "}
+          <Link to="/privacy" className="underline">Privacy Policy</Link>.
+        </p>
       </form>
     </div>
   )

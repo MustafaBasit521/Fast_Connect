@@ -14,8 +14,13 @@ async def create_event(data: EventCreate, current_user: UserOut = Depends(get_cu
 
 
 @router.get("", response_model=list[EventOut])
-async def list_events(category: str | None = None, current_user: UserOut = Depends(get_current_user)):
-    return await event_service.list_upcoming_events(current_user.id, category)
+async def list_events(
+    category: str | None = None,
+    skip: int = 0,
+    limit: int = 20,
+    current_user: UserOut = Depends(get_current_user),
+):
+    return await event_service.list_upcoming_events(current_user.id, category, skip, limit)
 
 
 @router.get("/{event_id}", response_model=EventOut)
