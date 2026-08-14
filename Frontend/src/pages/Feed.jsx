@@ -53,7 +53,7 @@ function CommentSection({ postId, currentUserId }) {
     <div className="mt-3 ml-1 border-l-2 pl-3 flex flex-col gap-1" style={{ borderColor: "var(--color-border)" }}>
       {comments.map((comment) => (
         <div key={comment.id} className="flex items-start justify-between gap-2">
-          <p className="text-sm">
+          <p className="text-sm break-words">
             <span className="font-semibold">{comment.author_name}: </span>
             {comment.content}
           </p>
@@ -253,11 +253,17 @@ function Feed() {
           {initials(user.name)}
         </div>
         <form onSubmit={handleCreate} className="flex-1 flex flex-col gap-2">
-          <input
+          <textarea
             placeholder="Share something with your campus..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full border rounded px-3 py-2"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                handleCreate(e)
+              }
+            }}
+            rows={1}
+            className="w-full border rounded px-3 py-2 resize-none"
             style={{ borderColor: "var(--color-border)" }}
           />
 
@@ -345,7 +351,7 @@ function Feed() {
               </div>
             ) : (
               <>
-                <p>{post.content}</p>
+                <p className="break-words">{post.content}</p>
                 {post.image_url && (
                   <img
                     src={post.image_url}
