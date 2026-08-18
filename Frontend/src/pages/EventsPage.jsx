@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { Calendar } from "lucide-react"
 import { getErrorMessage } from "../utils/errors"
 import { useToast } from "../context/ToastContext"
 import { useAuth } from "../context/AuthContext"
@@ -209,7 +210,7 @@ function CreateEventForm({ onCreated, onClose }) {
           type="submit"
           disabled={submitting}
           className="rounded px-4 py-2 font-semibold disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
+          style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
         >
           {submitting ? "Publishing..." : "Publish Event"}
         </button>
@@ -283,13 +284,13 @@ function EventsPage() {
         <button
           onClick={() => setShowForm((v) => !v)}
           className="rounded px-4 py-2 font-semibold"
-          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
+          style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
         >
           {showForm ? "Cancel" : "+ Create Event"}
         </button>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto">
+      <div className="flex gap-2 overflow-x-auto scroll-hide pb-1">
         {["All", ...CATEGORIES].map((c) => (
           <button
             key={c}
@@ -316,7 +317,7 @@ function EventsPage() {
       {loading ? (
         <p style={{ color: "var(--color-muted)" }}>Loading events...</p>
       ) : events.length === 0 ? (
-        <EmptyState icon="🎉" title="No events yet" message="Be the first to organize something for your campus!" />
+        <EmptyState icon={Calendar} title="No events yet" message="Be the first to organize something for your campus!" />
       ) : (
         <>
           <div className="grid sm:grid-cols-2 gap-4">

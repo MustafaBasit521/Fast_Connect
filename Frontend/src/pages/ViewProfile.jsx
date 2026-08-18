@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import { Lock, Camera } from "lucide-react"
 import { getErrorMessage } from "../utils/errors"
 import { initials } from "../utils/initials"
 import { useAuth } from "../context/AuthContext"
@@ -96,7 +97,7 @@ function ViewProfile() {
 
       if (response.ok) {
         setRelationship({ status: "accepted", request_id: relationship.request_id })
-        addToast(`You are now following each other`, "success")
+        addToast(`Friend request accepted`, "success")
       } else {
         addToast("Could not accept request.", "error")
       }
@@ -125,7 +126,7 @@ function ViewProfile() {
   function followLabel() {
     if (relationship.status === "accepted") return "Followed"
     if (relationship.status === "pending_outgoing") return "Requested"
-    if (relationship.status === "pending_incoming") return "Follow Back"
+    if (relationship.status === "pending_incoming") return "Accept Request"
     return "Follow"
   }
 
@@ -191,7 +192,7 @@ function ViewProfile() {
 
         {!checkingRelationship && !canSeePosts ? (
           <EmptyState
-            icon="🔒"
+            icon={Lock}
             title="This account is private"
             message="Follow this account to see their photos and videos."
           />
@@ -204,8 +205,8 @@ function ViewProfile() {
             </>
           ) : posts.length === 0 ? (
             <EmptyState 
-              icon="📷" 
-              title="No posts yet" 
+              icon={Camera}
+              title="No posts yet"
               message={`${profile.name} hasn't shared anything with the campus yet.`} 
             />
           ) : (

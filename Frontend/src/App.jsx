@@ -21,6 +21,8 @@ import EventsPage from "./pages/EventsPage"
 import ResourcesPage from "./pages/ResourcesPage"
 import CampusMapPage from "./pages/CampusMapPage"
 import TrendingPage from "./pages/TrendingPage"
+import SuggestionsPage from "./pages/SuggestionsPage"
+import FeedbackPage from "./pages/FeedbackPage"
 import VerifyEmailPage from "./pages/VerifyEmailPage"
 import TermsPage from "./pages/TermsPage"
 import PrivacyPage from "./pages/PrivacyPage"
@@ -56,6 +58,8 @@ function App() {
               <Route path="/resources" element={<ResourcesPage />} />
               <Route path="/campus-map" element={<CampusMapPage />} />
               <Route path="/trending" element={<TrendingPage />} />
+              <Route path="/suggestions" element={<SuggestionsPage />} />
+              <Route path="/feedback" element={<FeedbackPage />} />
             </Route>
 
             <Route path="/verify-email" element={<VerifyEmailPage />} />

@@ -5,7 +5,7 @@ function MagneticButton({ children, className = "", ...props }) {
 
   function handleMouseMove(e) {
     const el = ref.current
-    if (!el) return
+    if (!el || !window.matchMedia("(hover: hover)").matches) return
 
     const rect = el.getBoundingClientRect()
     const centerX = rect.left + rect.width / 2

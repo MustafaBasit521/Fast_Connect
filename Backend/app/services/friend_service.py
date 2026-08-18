@@ -163,6 +163,31 @@ async def get_relationship_status(current_user_id: str, other_user_id: str) -> R
     return RelationshipStatus(status="pending_incoming", request_id=str(request["_id"]))
 
 
+async def get_friend_ids(current_user_id: str) -> set[str]:
+    cursor = db["friend_requests"].find({
+        "status": "accepted",
+        "$or": [{"from_user_id": current_user_id}, {"to_user_id": current_user_id}],
+    })
+
+    friend_ids = set()
+    async for req in cursor:
+        is_sender = req["from_user_id"] == current_user_id
+        friend_ids.add(req["to_user_id"] if is_sender else req["from_user_id"])
+
+    return friend_ids
+
+
+async def are_friends(user_a_id: str, user_b_id: str) -> bool:
+    request = await db["friend_requests"].find_one({
+        "status": "accepted",
+        "$or": [
+            {"from_user_id": user_a_id, "to_user_id": user_b_id},
+            {"from_user_id": user_b_id, "to_user_id": user_a_id},
+        ],
+    })
+    return request is not None
+
+
 async def discover_users(current_user_id: str) -> list[UserOut]:
     cursor = db["friend_requests"].find({
         "$or": [{"from_user_id": current_user_id}, {"to_user_id": current_user_id}],

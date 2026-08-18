@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom"
+import { Home, Users, MessageSquare, Calendar, BookOpen, MapPin, Search as SearchIcon, User as UserIcon, Sun, Moon, Bell, Bot, MessageSquareHeart } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import { initials } from "../utils/initials"
@@ -17,15 +18,20 @@ function authHeaders() {
 }
 
 const navItems = [
-  { to: "/feed", label: "Feed", icon: "🏠" },
-  { to: "/friends", label: "Friends", icon: "👥" },
-  { to: "/messages", label: "Messages", icon: "💬" },
-  { to: "/events", label: "Events", icon: "🎉" },
-  { to: "/resources", label: "Resources", icon: "📚" },
-  { to: "/campus-map", label: "Campus Map", icon: "🗺️" },
-  { to: "/search", label: "Search", icon: "🔍" },
-  { to: "/profile", label: "Profile", icon: "👤" },
+  { to: "/feed", label: "Feed", icon: Home },
+  { to: "/friends", label: "Friends", icon: Users },
+  { to: "/messages", label: "Messages", icon: MessageSquare },
+  { to: "/events", label: "Events", icon: Calendar },
+  { to: "/resources", label: "Resources", icon: BookOpen },
+  { to: "/campus-map", label: "Campus Map", icon: MapPin },
+  { to: "/search", label: "Search", icon: SearchIcon },
+  { to: "/profile", label: "Profile", icon: UserIcon },
 ]
+
+// Profile is already reachable via the avatar menu, and Search gets its own
+// icon in the mobile top bar — keeps the bottom tab bar to items that fit
+// on a phone screen in one row, no wrapping/scrolling needed.
+const mobileNavItems = navItems.filter((item) => item.to !== "/profile" && item.to !== "/search")
 
 function AppShell() {
   const { user, logout } = useAuth()
@@ -74,7 +80,7 @@ function AppShell() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="h-screen flex flex-col"
       style={{ backgroundColor: "var(--color-bg)", backgroundImage: "var(--bg-pattern)", backgroundSize: "400px 400px" }}
     >
       <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
@@ -91,13 +97,22 @@ function AppShell() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 relative">
+          <Link
+            to="/search"
+            aria-label="Search"
+            className="md:hidden w-9 h-9 rounded-full border flex items-center justify-center shrink-0"
+            style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}
+          >
+            <SearchIcon className="w-4 h-4" />
+          </Link>
+
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
             className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0"
-            style={{ borderColor: "var(--color-border)" }}
+            style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}
           >
-            {theme === "light" ? "🌙" : "☀️"}
+            {theme === "light" ? <Moon className="w-4 h-4" strokeWidth={1.75} /> : <Sun className="w-4 h-4" strokeWidth={1.75} />}
           </button>
 
           <div className="relative">
@@ -107,7 +122,7 @@ function AppShell() {
               className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 relative"
               style={{ borderColor: "var(--color-border)", color: "var(--color-muted)" }}
             >
-              🔔
+              <Bell className="w-4 h-4" strokeWidth={1.75} />
               {notifCount > 0 && (
                 <span
                   className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
@@ -180,11 +195,12 @@ function AppShell() {
         >
           {navItems.map((item) => {
             const isActive = location.pathname === item.to
+            const Icon = item.icon
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`text-sm py-2 rounded font-medium flex items-center transition-all duration-200 ${isSidebarOpen ? 'px-3 gap-3 w-full' : 'justify-center w-10 h-10 px-0'}`}
+                className={`nav-hover text-sm py-2 rounded font-medium flex items-center transition-all duration-200 ${isSidebarOpen ? 'px-3 gap-3 w-full' : 'justify-center w-10 h-10 px-0'}`}
                 style={
                   isActive
                     ? { backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }
@@ -192,14 +208,30 @@ function AppShell() {
                 }
                 title={!isSidebarOpen ? item.label : ""}
               >
-                <span className="text-lg leading-none">{item.icon}</span>
+                <Icon className="w-5 h-5 shrink-0" strokeWidth={1.75} />
                 {isSidebarOpen && <span className="whitespace-nowrap overflow-hidden">{item.label}</span>}
               </Link>
             )
           })}
+
+          <Link
+            to="/feedback"
+            className={`nav-hover text-sm py-2 rounded font-medium flex items-center transition-all duration-200 mt-auto ${isSidebarOpen ? 'px-3 gap-3 w-full' : 'justify-center w-10 h-10 px-0'}`}
+            style={{ color: "var(--color-muted)" }}
+            title={!isSidebarOpen ? "Feedback" : ""}
+          >
+            <MessageSquareHeart className="w-5 h-5 shrink-0" strokeWidth={1.75} />
+            {isSidebarOpen && <span className="whitespace-nowrap overflow-hidden">Feedback</span>}
+          </Link>
+
+          {isSidebarOpen && (
+            <p className="text-xs text-center px-2 pt-1" style={{ color: "var(--color-muted)" }}>
+              Built by a FAST-NUCES student
+            </p>
+          )}
         </div>
 
-        <div className="flex-1 p-4 md:p-6 pb-20 md:pb-6 relative overflow-hidden overflow-x-hidden">
+        <div className="flex-1 p-4 md:p-6 pb-20 md:pb-6 relative overflow-y-auto overflow-x-hidden">
           {theme === "light" && <Particles count={22} color="212, 168, 83" />}
 
           <div className="relative z-10">
@@ -209,24 +241,36 @@ function AppShell() {
       </div>
 
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 flex items-center justify-around border-t py-2 z-30"
+        className="md:hidden fixed bottom-0 left-0 right-0 flex items-center justify-around border-t py-2 px-1 z-30"
         style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}
       >
-        {navItems.map((item) => {
+        {mobileNavItems.map((item) => {
           const isActive = location.pathname === item.to
+          const Icon = item.icon
           return (
             <Link
               key={item.to}
               to={item.to}
-              className="flex flex-col items-center gap-0.5 px-2 py-1 text-xs font-medium"
+              className="flex flex-col items-center gap-0.5 px-2.5 py-1 text-xs font-medium shrink-0 whitespace-nowrap"
               style={{ color: isActive ? "var(--color-primary)" : "var(--color-muted)" }}
             >
-              <span className="text-lg leading-none">{item.icon}</span>
+              <Icon className="w-5 h-5" strokeWidth={1.75} />
               {item.label}
             </Link>
           )
         })}
       </div>
+
+      {location.pathname !== "/messages" && (
+        <Link
+          to="/messages"
+          aria-label="Chat with FAST AI"
+          className="fixed bottom-20 md:bottom-6 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+        >
+          <Bot className="w-6 h-6" strokeWidth={1.75} />
+        </Link>
+      )}
     </div>
   )
 }

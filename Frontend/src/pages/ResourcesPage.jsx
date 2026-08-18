@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { BookOpen } from "lucide-react"
 import { getErrorMessage } from "../utils/errors"
 import { useToast } from "../context/ToastContext"
 import { useAuth } from "../context/AuthContext"
@@ -171,7 +172,7 @@ function UploadResourceForm({ onUploaded, onClose }) {
           type="submit"
           disabled={uploading || !file}
           className="rounded px-4 py-2 font-semibold disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
+          style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
         >
           {uploading ? "Uploading..." : "Upload Resource"}
         </button>
@@ -256,7 +257,7 @@ function ResourcesPage() {
         <button
           onClick={() => setShowForm((v) => !v)}
           className="rounded px-4 py-2 font-semibold"
-          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
+          style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
         >
           {showForm ? "Cancel" : "+ Upload Resource"}
         </button>
@@ -289,7 +290,7 @@ function ResourcesPage() {
       {loading ? (
         <p style={{ color: "var(--color-muted)" }}>Loading resources...</p>
       ) : resources.length === 0 ? (
-        <EmptyState icon="📚" title="No resources yet" message="Share your notes, past papers, or project files with the campus." />
+        <EmptyState icon={BookOpen} title="No resources yet" message="Share your notes, past papers, or project files with the campus." />
       ) : (
         <>
           <div className="flex flex-col gap-3">

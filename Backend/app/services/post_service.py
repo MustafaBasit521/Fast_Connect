@@ -6,6 +6,7 @@ from bson.errors import InvalidId
 
 from app.database.connection import db
 from app.schemas.post import PostCreate, PostUpdate, PostOut, TrendingTopicOut
+from app.services import friend_service
 
 HASHTAG_PATTERN = re.compile(r"#(\w+)")
 
@@ -42,10 +43,24 @@ async def create_post(author_id: str, author_name: str, data: PostCreate) -> Pos
     return _to_post_out(post_data, author_id)
 
 
+async def _hidden_private_author_ids(current_user_id: str) -> list[str]:
+    private_ids = {str(u["_id"]) async for u in db["users"].find({"is_private": True}, {"_id": 1})}
+    private_ids.discard(current_user_id)
+    if not private_ids:
+        return []
+
+    friend_ids = await friend_service.get_friend_ids(current_user_id)
+    return list(private_ids - friend_ids)
+
+
 async def get_feed(current_user_id: str, skip: int = 0, limit: int = 20, hashtag: str | None = None) -> list[PostOut]:
     query = {}
     if hashtag:
         query["hashtags"] = hashtag.lower().lstrip("#")
+
+    hidden_ids = await _hidden_private_author_ids(current_user_id)
+    if hidden_ids:
+        query["author_id"] = {"$nin": hidden_ids}
 
     cursor = db["posts"].find(query).sort("created_at", -1).skip(skip).limit(limit)
 
@@ -65,6 +80,11 @@ async def get_post(post_id: str, current_user_id: str) -> PostOut | None:
     post = await db["posts"].find_one({"_id": object_id})
     if post is None:
         return None
+
+    if post["author_id"] != current_user_id:
+        author = await db["users"].find_one({"_id": ObjectId(post["author_id"])})
+        if author and author.get("is_private", False) and not await friend_service.are_friends(current_user_id, post["author_id"]):
+            return None
 
     return _to_post_out(post, current_user_id)
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { Flame, ArrowLeft } from "lucide-react"
 import { EmptyState } from "../components/EmptyState"
 
 const API = "https://fast-connect-bay.vercel.app"
@@ -25,12 +26,15 @@ function TrendingPage() {
 
   return (
     <div className="max-w-xl mx-auto flex flex-col gap-4">
+      <Link to="/feed" className="flex items-center gap-1.5 text-sm w-fit hover:opacity-70" style={{ color: "var(--color-muted)" }}>
+        <ArrowLeft className="w-4 h-4" /> Back to Feed
+      </Link>
       <h1 className="text-2xl font-bold">🔥 Trending Topics</h1>
 
       {loading ? (
         <p style={{ color: "var(--color-muted)" }}>Loading...</p>
       ) : topics.length === 0 ? (
-        <EmptyState icon="🔥" title="Nothing trending yet" message="Post with a #hashtag to start a trend!" />
+        <EmptyState icon={Flame} title="Nothing trending yet" message="Post with a #hashtag to start a trend!" />
       ) : (
         <div className="flex flex-col gap-2">
           {topics.map((topic, i) => (

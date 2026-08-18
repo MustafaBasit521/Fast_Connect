@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
+import { Bot } from "lucide-react"
 import { initials } from "../utils/initials"
 import ChatbotPane from "../components/ChatbotPane"
 
@@ -99,13 +100,13 @@ function MessagesPage() {
               className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
               style={
                 friend.isAI
-                  ? { backgroundColor: "var(--color-accent)" }
+                  ? { backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }
                   : friend.deleted
                   ? { backgroundColor: "var(--color-border)", color: "var(--color-muted)" }
                   : { backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }
               }
             >
-              {friend.isAI ? "🤖" : friend.deleted ? "?" : initials(friend.name)}
+              {friend.isAI ? <Bot className="w-4 h-4" strokeWidth={1.75} /> : friend.deleted ? "?" : initials(friend.name)}
             </div>
             <p className={friend.deleted ? "text-sm italic" : "font-medium text-sm"} style={friend.deleted ? { color: "var(--color-muted)" } : undefined}>
               {friend.name}
@@ -128,6 +129,12 @@ function MessagesPage() {
               >
                 ←
               </button>
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0"
+                style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+              >
+                {initials(selected.name)}
+              </div>
               {selected.name}
             </div>
 
@@ -152,15 +159,15 @@ function MessagesPage() {
                 This user's account has been deleted — you can't send new messages.
               </p>
             ) : (
-              <form onSubmit={handleSend} className="p-4 border-t flex gap-2" style={{ borderColor: "var(--color-border)" }}>
+              <form onSubmit={handleSend} className="p-4 border-t flex items-center gap-2" style={{ borderColor: "var(--color-border)" }}>
                 <input
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Write a message..."
-                  className="flex-1 border rounded px-3 py-2"
+                  className="flex-1 border rounded px-3 py-2 h-10"
                   style={{ borderColor: "var(--color-border)" }}
                 />
-                <button type="submit" className="rounded px-4 py-2" style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}>
+                <button type="submit" className="rounded px-4 h-10" style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}>
                   Send
                 </button>
               </form>

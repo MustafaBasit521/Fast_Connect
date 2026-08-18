@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react"
+import { Bot } from "lucide-react"
 
 const API = "https://fast-connect-bay.vercel.app"
 
@@ -70,10 +71,10 @@ function ChatbotPane({ onBack }) {
           </button>
         )}
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0"
-          style={{ backgroundColor: "var(--color-accent)" }}
+          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
         >
-          🤖
+          <Bot className="w-4 h-4" strokeWidth={1.75} />
         </div>
         FAST AI
       </div>
@@ -114,18 +115,18 @@ function ChatbotPane({ onBack }) {
 
       {error && <p className="px-4 pb-2 text-xs" style={{ color: "var(--color-danger)" }}>{error}</p>}
 
-      <form onSubmit={handleSend} className="p-4 border-t flex gap-2" style={{ borderColor: "var(--color-border)" }}>
+      <form onSubmit={handleSend} className="p-4 border-t flex items-center gap-2" style={{ borderColor: "var(--color-border)" }}>
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Message FAST AI..."
-          className="flex-1 border rounded px-3 py-2"
+          className="flex-1 border rounded px-3 py-2 h-10"
           style={{ borderColor: "var(--color-border)" }}
         />
         <button
           type="submit"
           disabled={sending}
-          className="rounded px-4 py-2 disabled:opacity-50"
+          className="rounded px-4 h-10 disabled:opacity-50"
           style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
         >
           Send

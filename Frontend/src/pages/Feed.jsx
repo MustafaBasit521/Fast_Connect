@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link, useSearchParams } from "react-router-dom"
+import { Inbox, Library, Headphones, GraduationCap, MapPin, Calendar, X, Send, MoreHorizontal } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { initials } from "../utils/initials"
 import { getErrorMessage } from "../utils/errors"
@@ -18,9 +19,21 @@ function authHeaders() {
   }
 }
 
+function timeAgo(iso) {
+  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (seconds < 60) return "just now"
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
+}
+
 function CommentSection({ postId, currentUserId }) {
   const [comments, setComments] = useState([])
   const [content, setContent] = useState("")
+  const [openMenuId, setOpenMenuId] = useState(null)
 
   async function loadComments() {
     const response = await fetch(`https://fast-connect-bay.vercel.app/posts/${postId}/comments`, {
@@ -49,23 +62,76 @@ function CommentSection({ postId, currentUserId }) {
     loadComments()
   }
 
-  return (
-    <div className="mt-3 ml-1 border-l-2 pl-3 flex flex-col gap-1" style={{ borderColor: "var(--color-border)" }}>
-      {comments.map((comment) => (
-        <div key={comment.id} className="flex items-start justify-between gap-2">
-          <p className="text-sm break-words">
-            <span className="font-semibold">{comment.author_name}: </span>
-            {comment.content}
-          </p>
-          {comment.author_id !== currentUserId && (
-            <ReportButton targetType="comment" targetId={comment.id} className="shrink-0" />
-          )}
-        </div>
-      ))}
+  async function handleDeleteComment(commentId) {
+    await fetch(`https://fast-connect-bay.vercel.app/comments/${commentId}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    })
+    setOpenMenuId(null)
+    loadComments()
+  }
 
-      <form onSubmit={handleAddComment} className="flex gap-2 mt-1">
-        <input placeholder="Write a comment..." value={content} onChange={(e) => setContent(e.target.value)} className="border rounded px-2 py-1 text-sm flex-1" style={{ borderColor: "var(--color-border)" }} />
-        <button type="submit" className="text-sm font-medium" style={{ color: "var(--color-accent)" }}>Reply</button>
+  return (
+    <div className="mt-3 pt-3 border-t flex flex-col min-w-0 flex-1 min-h-0" style={{ borderColor: "var(--color-border)" }}>
+      <div className="flex flex-col gap-4 min-w-0 flex-1 min-h-0 overflow-y-auto">
+        {comments.map((comment) => (
+          <div key={comment.id} className="flex items-start gap-2.5 min-w-0">
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0"
+              style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+            >
+              {initials(comment.author_name)}
+            </div>
+            <p className="text-sm break-words min-w-0 flex-1">
+              <span className="font-semibold">{comment.author_name} </span>
+              {comment.content}
+            </p>
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setOpenMenuId(openMenuId === comment.id ? null : comment.id)}
+                aria-label="Comment options"
+                className="p-0.5"
+                style={{ color: "var(--color-muted)" }}
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+              {openMenuId === comment.id && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                  <div
+                    className="absolute right-0 top-6 z-20 rounded-lg shadow-lg border py-1 min-w-[110px]"
+                    style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-border)" }}
+                  >
+                    {comment.author_id === currentUserId ? (
+                      <button
+                        onClick={() => handleDeleteComment(comment.id)}
+                        className="block w-full text-left px-3 py-1.5 text-xs"
+                        style={{ color: "var(--color-danger)" }}
+                      >
+                        Delete
+                      </button>
+                    ) : (
+                      <ReportButton targetType="comment" targetId={comment.id} className="block w-full text-left px-3 py-1.5" />
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={handleAddComment} className="flex items-center gap-2 mt-4 shrink-0">
+        <input
+          placeholder="Write a comment..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="border rounded-full px-3 py-1.5 text-sm flex-1 min-w-0"
+          style={{ borderColor: "var(--color-border)" }}
+        />
+        <button type="submit" aria-label="Send comment" className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center" style={{ color: "var(--color-accent)" }}>
+          <Send className="w-4 h-4" strokeWidth={1.75} />
+        </button>
       </form>
     </div>
   )
@@ -81,6 +147,8 @@ function Feed() {
   const [imagePreview, setImagePreview] = useState(null)
   const [uploading, setUploading] = useState(false)
   const { addToast } = useToast()
+  const [deleteTargetId, setDeleteTargetId] = useState(null)
+  const [expandedPostId, setExpandedPostId] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [editContent, setEditContent] = useState("")
   const [loading, setLoading] = useState(true)
@@ -201,6 +269,7 @@ function Feed() {
       method: "DELETE",
       headers: authHeaders(),
     })
+    setDeleteTargetId(null)
     loadFeed()
   }
 
@@ -313,9 +382,9 @@ function Feed() {
             <PostSkeleton />
           </>
         ) : posts.length === 0 ? (
-          <EmptyState 
-            icon="📭" 
-            title="No posts yet" 
+          <EmptyState
+            icon={Inbox}
+            title="No posts yet"
             message="Be the first to share something with your campus!" 
           />
         ) : (
@@ -330,7 +399,8 @@ function Feed() {
                   {initials(post.author_name)}
                 </div>
                 <div>
-                  <p className="font-semibold">{post.author_name}</p>
+                  <p className="font-semibold text-base">{post.author_name}</p>
+                  <p className="text-xs" style={{ color: "var(--color-muted)" }}>{timeAgo(post.created_at)}</p>
                 </div>
               </Link>
             </div>
@@ -356,7 +426,8 @@ function Feed() {
                   <img
                     src={post.image_url}
                     alt="Post attachment"
-                    className="w-full h-auto rounded-lg mt-2"
+                    onClick={() => setExpandedPostId(post.id)}
+                    className="w-full h-auto rounded-lg mt-2 cursor-pointer"
                   />
                 )}
               </>
@@ -370,7 +441,7 @@ function Feed() {
               {post.author_id === user.id && editingId !== post.id && (
                 <>
                   <button onClick={() => startEdit(post)} style={{ color: "var(--color-accent)" }}>Edit</button>
-                  <button onClick={() => handleDelete(post.id)} style={{ color: "var(--color-danger)" }}>Delete</button>
+                  <button onClick={() => setDeleteTargetId(post.id)} style={{ color: "var(--color-danger)" }}>Delete</button>
                 </>
               )}
 
@@ -392,10 +463,9 @@ function Feed() {
         {/* Campus Events quick-link card */}
         <Link
           to="/events"
-          className="p-5 rounded-xl flex items-center gap-4 hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: "var(--color-bg, #1a1a2e)", border: "1px solid var(--color-border, #333)" }}
+          className="post-card p-5 rounded-xl flex items-center gap-4 hover:opacity-90 transition-opacity"
         >
-          <span className="text-3xl shrink-0">🎉</span>
+          <Calendar className="w-7 h-7 shrink-0" strokeWidth={1.5} style={{ color: "var(--color-primary)" }} />
           <div>
             <h2 className="text-sm font-bold">Campus Events</h2>
             <p className="text-xs" style={{ color: "var(--color-muted)" }}>
@@ -420,7 +490,7 @@ function Feed() {
         </Link> */}
 
         {/* Trending Topics Box */}
-        <div className="p-5 rounded-xl" style={{ backgroundColor: "var(--color-bg, #1a1a2e)", border: "1px solid var(--color-border, #333)" }}>
+        <div className="post-card p-5 rounded-xl">
            <div className="flex justify-between items-center mb-4">
              <h2 className="text-sm font-bold text-gray-400">Trending Topics</h2>
              <Link to="/trending" className="text-xs font-semibold hover:opacity-70" style={{ color: "var(--color-primary)" }}>See All</Link>
@@ -443,23 +513,23 @@ function Feed() {
         <SuggestionsBox />
 
         {/* Quick Links */}
-        <div className="p-5 rounded-xl" style={{ backgroundColor: "var(--color-bg, #1a1a2e)", border: "1px solid var(--color-border, #333)" }}>
+        <div className="post-card p-5 rounded-xl">
           <h2 className="text-sm font-bold mb-3">Quick Links</h2>
           <div className="grid grid-cols-2 gap-2">
             <Link to="/campus-map" className="rounded-lg p-3 text-center hover:opacity-80 transition-opacity" style={{ border: "1px solid var(--color-border)" }}>
-              <div className="text-xl mb-1">🗺️</div>
+              <MapPin className="w-5 h-5 mx-auto mb-1" strokeWidth={1.75} />
               <p className="text-xs font-medium">Campus Map</p>
             </Link>
             <div className="rounded-lg p-3 text-center opacity-50 cursor-default" style={{ border: "1px solid var(--color-border)" }}>
-              <div className="text-xl mb-1">📖</div>
+              <Library className="w-5 h-5 mx-auto mb-1" strokeWidth={1.75} />
               <p className="text-xs font-medium">Library</p>
             </div>
             <div className="rounded-lg p-3 text-center opacity-50 cursor-default" style={{ border: "1px solid var(--color-border)" }}>
-              <div className="text-xl mb-1">🎧</div>
+              <Headphones className="w-5 h-5 mx-auto mb-1" strokeWidth={1.75} />
               <p className="text-xs font-medium">IT Support</p>
             </div>
             <div className="rounded-lg p-3 text-center opacity-50 cursor-default" style={{ border: "1px solid var(--color-border)" }}>
-              <div className="text-xl mb-1">🎓</div>
+              <GraduationCap className="w-5 h-5 mx-auto mb-1" strokeWidth={1.75} />
               <p className="text-xs font-medium">Student Portal</p>
             </div>
           </div>
@@ -468,17 +538,95 @@ function Feed() {
         {/* Instagram-style Footer */}
         <div className="mt-4 text-xs text-gray-500 flex flex-col gap-2 px-2">
           <div className="flex gap-x-3 gap-y-1 flex-wrap">
-            <a href="#" className="hover:underline">About</a>
-            <a href="#" className="hover:underline">Help</a>
-            <a href="#" className="hover:underline">Press</a>
-            <a href="#" className="hover:underline">API</a>
-            <a href="#" className="hover:underline">Jobs</a>
-            <a href="#" className="hover:underline">Privacy</a>
-            <a href="#" className="hover:underline">Terms</a>
+            <Link to="/privacy" className="hover:underline">Privacy</Link>
+            <Link to="/terms" className="hover:underline">Terms</Link>
+            <Link to="/feedback" className="hover:underline">Feedback</Link>
           </div>
           <p className="mt-2">© 2026 FAST Connect from Mustafa</p>
         </div>
       </div>
+
+      {deleteTargetId && (
+        <div className="report-backdrop" onClick={() => setDeleteTargetId(null)}>
+          <div className="report-glass-card" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-lg mb-2" style={{ color: "#fff" }}>Delete this post?</h3>
+            <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.7)" }}>
+              This can't be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTargetId(null)}
+                className="text-sm px-4 py-2 rounded-lg"
+                style={{ color: "rgba(255,255,255,0.7)" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(deleteTargetId)}
+                className="text-sm font-semibold px-4 py-2 rounded-lg"
+                style={{ backgroundColor: "#ef4444", color: "#fff" }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {expandedPostId && (() => {
+        const post = posts.find((p) => p.id === expandedPostId)
+        if (!post) return null
+        return (
+          <div className="report-backdrop" onClick={() => setExpandedPostId(null)}>
+            <div
+              className="w-full max-w-5xl max-h-[90vh] rounded-xl overflow-hidden flex flex-col md:flex-row"
+              style={{ backgroundColor: "var(--color-surface)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex-1 flex items-center justify-center min-h-0" style={{ backgroundColor: "#000" }}>
+                <img src={post.image_url} alt="Post attachment" className="max-w-full max-h-[40vh] md:max-h-[90vh] object-contain" />
+              </div>
+
+              <div className="w-full md:w-[360px] shrink-0 flex flex-col min-h-0">
+                <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: "var(--color-border)" }}>
+                  <Link to={`/profile/${post.author_id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity" onClick={() => setExpandedPostId(null)}>
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+                      style={{ backgroundColor: "var(--color-primary)", color: "var(--color-bg)" }}
+                    >
+                      {initials(post.author_name)}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">{post.author_name}</p>
+                      <p className="text-xs" style={{ color: "var(--color-muted)" }}>{timeAgo(post.created_at)}</p>
+                    </div>
+                  </Link>
+                  <button onClick={() => setExpandedPostId(null)} aria-label="Close" style={{ color: "var(--color-muted)" }}>
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {post.content && <p className="break-words text-sm p-4 pb-0">{post.content}</p>}
+
+                <div className="flex gap-4 items-center text-sm p-4">
+                  <button onClick={() => handleLikeToggle(post)} className="font-medium" style={{ color: post.liked_by_me ? "var(--color-coral)" : "var(--color-muted)" }}>
+                    {post.liked_by_me ? "❤️" : "🤍"} {post.likes_count}
+                  </button>
+                  {post.author_id !== user.id && (
+                    <ReportButton targetType="post" targetId={post.id} />
+                  )}
+                </div>
+
+                <div className="flex-1 min-h-0 flex flex-col p-4 pt-0">
+                  <CommentSection postId={post.id} currentUserId={user.id} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
